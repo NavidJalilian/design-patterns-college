@@ -1332,6 +1332,8 @@ table.t tr:last-child td{border-bottom:0}
      d: موجودیت زیرین {from, r, e} · s: رابطهٔ بازگشتی {at, r, hl}
      صفت: [متن, پرچم‌ها, الگوی سرنخ]؛ پرچم: k کلید، p کلید جزئی، m چندمقداری، d مشتق؛ w = ضعیف */
   const LR = t => '<bdi dir="ltr">' + t + '</bdi>';
+  // توضیح ستون نقش‌ها: پل بین ER (سؤال ۲) و الگو (سؤال ۳)
+  const ROLE_NOTE = '<p class="sub"><b>ستون «کدام کلاس، کدام نقش الگو» یعنی چه؟</b> این ستون مال الگوست، نه ER؛ ER نقش ندارد. هر موجودیت ER در نرم‌افزار یک <b>کلاس</b> می‌شود، و هر الگو چند <b>نقش</b> (عنوان شغلی) دارد. این ستون می‌گوید کدام کلاس کدام نقش را بازی می‌کند. مثال: موجودیت «سفارش» با صفت «وضعیت» ← کلاس Order ← در الگوی State نقش Context را دارد، و هر مقدار وضعیت (Placed، Paid، Shipped) یک کلاس کوچک با نقش ConcreteState می‌شود. نوشتن همین ستون در امتحان نشان می‌دهد الگو را روی سیستم خودت پیاده کرده‌ای، نه فقط اسمش را حفظ کرده‌ای.</p>';
   function erDraw(sp) {
     const n = sp.e.length, xs = n === 2 ? [670, 230] : [750, 450, 150], Y = 200;
     const H = sp.d ? 640 : sp.s ? 400 : 360;
@@ -2027,7 +2029,7 @@ table.t tr:last-child td{border-bottom:0}
     { t:'text', eyebrow:'۱۰ موضوع، الگوهای انتخاب‌شده', h:'یک نگاه به همهٔ جواب‌ها', lead:'برای هر کدام از ۱۰ نمونهٔ ER درس ۱۷، این الگوها را انتخاب کردم. دلیل و نقش‌های هر الگو زیر نمودار همان نمونه آمده است.', html: table(['موضوع','الگوهای انتخاب‌شده','چیزی که عمداً انتخاب نکردم'], ER_EX.map(x => [x.i + ' ' + x.t, x.p.map(q => PAT[q[0]].img + ' ' + pn(q[0])).join('<br>'), x.no])) + '<p class="hint">به تکرار نگاه کن: State در ۹ موضوع از ۱۰ و Observer در ۸ موضوع آمده؛ Adapter و Strategy هر کدام در ۵ موضوع. اگر وقت کم داری، اول این چهار الگو را خوب یاد بگیر.</p>' },
     { t:'text', eyebrow:'نمونهٔ جواب کامل', h:'موضوع: سامانهٔ کتابخانه', lead:'همان ER درس ۱۷. دو صفتِ رنگی، سرنخ دو الگو هستند.', html:
       LIB_ER(true) +
-      table(['نیاز در کتابخانه','الگو','چرا','نقش‌ها در طراحی من'], [
+      ROLE_NOTE + table(['نیاز در کتابخانه','الگو','چرا','کدام کلاس، کدام نقش الگو'], [
         ['امانت وضعیت دارد: امانت‌داده‌شده، دیرکرد، برگشت‌خورده. تمدید فقط در حالت «امانت‌داده‌شده» مجاز است.', pn('State'), 'قوانین هر وضعیت در کلاس خودش است. وضعیت تازه (مثلاً «گم‌شده») یعنی یک کلاس تازه، نه یک if تازه در همه‌جا.', '<bdi dir="ltr">Context: Loan</bdi><br><bdi dir="ltr">State: LoanState</bdi><br><bdi dir="ltr">ConcreteState: OnLoan, Overdue, Returned</bdi>'],
         ['جریمهٔ دیرکرد برای دانشجو، استاد و عضو آزاد فرق دارد (صفت «نوع عضو»).', pn('Strategy'), 'هر روش محاسبه یک کلاس است. اگر کتابخانه نوع عضو تازه‌ای اضافه کند، کد امانت تغییر نمی‌کند.', '<bdi dir="ltr">Context: Loan</bdi><br><bdi dir="ltr">Strategy: FinePolicy</bdi><br><bdi dir="ltr">ConcreteStrategy: StudentFine, ProfessorFine</bdi>'],
         ['وقتی کتاب رزروشده برمی‌گردد، به عضو منتظر خبر داده شود.', pn('Observer'), 'کتاب فقط اعلام می‌کند «برگشتم». اضافه کردن خبر ایمیلی کنار پیامک، کد کتاب را تغییر نمی‌دهد.', '<bdi dir="ltr">Subject: Book</bdi><br><bdi dir="ltr">Observer: ReservationNotifier</bdi>'],
@@ -2068,7 +2070,7 @@ table.t tr:last-child td{border-bottom:0}
           '<div><button type="button" class="btn primary" data-s>نشانم بده</button></div>' +
           '<div data-a hidden style="display:flex;flex-direction:column;gap:12px">' + erDraw(x) +
           '<h3 style="font-size:17px">خواندن نمودار</h3><ul class="steps2" style="list-style:disc">' + x.read.map(r => '<li>' + r + '</li>').join('') + '</ul>' +
-          '<h3 style="font-size:17px">الگوهایی که انتخاب کردم (جواب سؤال سوم)</h3>' + table(['الگو','چرا انتخابش کردم','نقش‌ها در این طراحی'], x.p.map(([k, w], j) => [PAT[k].img + ' ' + pn(k), w, x.ro[j].split(' · ').map(LR).join('<br>')])) + '<p class="sub"><b>چیزی که عمداً انتخاب نکردم:</b> ' + x.no + '</p></div>';
+          '<h3 style="font-size:17px">الگوهایی که انتخاب کردم (جواب سؤال سوم)</h3>' + ROLE_NOTE + table(['الگو','چرا انتخابش کردم','کدام کلاس، کدام نقش الگو'], x.p.map(([k, w], j) => [PAT[k].img + ' ' + pn(k), w, x.ro[j].split(' · ').map(LR).join('<br>')])) + '<p class="sub"><b>چیزی که عمداً انتخاب نکردم:</b> ' + x.no + '</p></div>';
         v.querySelector('[data-s]').onclick = e => { v.querySelector('[data-a]').hidden = false; e.currentTarget.hidden = true; };
         isolateLatin(v);
       };
