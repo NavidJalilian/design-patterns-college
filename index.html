@@ -1,0 +1,2072 @@
+<meta charset="utf-8">
+<title>Design Patterns Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* چیدمان: نقشهٔ دوره در کنار، صحنه‌های کوتاه و خودگام در وسط. پیش‌فرض خاکستری.
+   قانون رنگ: رنگ فقط یکی از این معناها را دارد و همه‌جا (یادگیری و آزمون) همان معنا را نگه می‌دارد:
+   --n/--p/--s/--c = چهار بخش الگو (نام، مسئله، راه‌حل، پیامد)
+   --create/--struct/--behave/--beyond = خانوادهٔ الگو (نقشه و نام الگوها)
+   --mark = واژهٔ کلیدی */
+:root{
+  --bg:#F4F5F7; --surface:#FFFFFF; --ink:#18202D; --muted:#5C6578; --line:#DADFE7; --soft:#EEF0F4;
+  --mark:#FFE58A;
+  --n:#7646D6; --p:#D2433A; --s:#0D8A95; --c:#B07A00;
+  --found:#4B5568; --create:#2A9152; --struct:#2F69D6; --behave:#D9681A; --beyond:#B03F78;
+  --f-body:"Vazirmatn",Tahoma,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F131A; --surface:#171C25; --ink:#E8ECF3; --muted:#9BA5B8; --line:#2A3241; --soft:#202734;
+  --mark:#6B5A12;
+  --n:#A485F3; --p:#FF6E64; --s:#33C3CE; --c:#EDB22E;
+  --found:#A3AEC2; --create:#4CC47A; --struct:#6E9CFF; --behave:#FF9448; --beyond:#E579B1; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0F131A; --surface:#171C25; --ink:#E8ECF3; --muted:#9BA5B8; --line:#2A3241; --soft:#202734;
+  --mark:#6B5A12;
+  --n:#A485F3; --p:#FF6E64; --s:#33C3CE; --c:#EDB22E;
+  --found:#A3AEC2; --create:#4CC47A; --struct:#6E9CFF; --behave:#FF9448; --beyond:#E579B1; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85}
+.wrap{max-width:1280px;margin:0 auto;padding-block:20px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:grid;grid-template-columns:290px minmax(0,1fr);gap:24px;align-items:start}
+h1,h2,h3{font-family:var(--f-body);line-height:1.4;text-wrap:balance;margin:0}
+p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px;border-radius:6px}
+.en{font-family:var(--f-mono);font-size:.82em;color:var(--muted);direction:ltr;unicode-bidi:isolate}
+.key{background:linear-gradient(transparent 58%,var(--mark) 58%);padding:0 2px}
+.N{color:var(--n)}.P{color:var(--p)}.S{color:var(--s)}.C{color:var(--c)}
+.fC{color:var(--create)}.fS{color:var(--struct)}.fB{color:var(--behave)}
+.pn{font-weight:800}
+/* هر تکهٔ انگلیسی داخل متن فارسی جدا (isolate) می‌شود تا ترتیب کلمات و علامت‌ها به‌هم نریزد */
+bdi.lat{direction:ltr;unicode-bidi:isolate}
+
+/* ---------- نقشهٔ دوره ---------- */
+.map{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 14px 12px;max-height:calc(100vh - 32px);overflow:auto}
+.map > summary{list-style:none}
+.map > summary::-webkit-details-marker{display:none}
+.brand{display:flex;flex-direction:column;gap:0;padding:0 6px 12px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.brand b{font-size:20px;font-weight:800}
+.brand span{font-size:13px;color:var(--muted)}
+.fam{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:var(--fc);padding:12px 6px 2px}
+.fam i{width:10px;height:10px;border-radius:3px;background:var(--fc);flex:none}
+.fam em{font-style:normal;color:var(--muted);font-weight:400;font-size:12px}
+.lesson summary{display:grid;grid-template-columns:26px 1fr auto;gap:6px;align-items:baseline;padding:5px 6px;cursor:pointer;border-radius:8px;font-size:14px;list-style:none}
+.lesson summary::-webkit-details-marker{display:none}
+.lesson summary:hover{background:var(--soft)}
+.lesson .n{font-weight:700;font-size:13px;color:var(--fc)}
+.lesson .st{font-size:11px;color:var(--muted)}
+.lesson.on summary{background:var(--soft);font-weight:700}
+.lesson.on .st{color:var(--ink);font-weight:700}
+.tags{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:2px 38px 10px 6px}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;line-height:1.5;padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+.open{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;border:1.5px solid var(--ink);background:var(--surface);cursor:pointer}
+.maphint{font-size:12px;color:var(--muted);padding:10px 6px 0;border-top:1px solid var(--line);margin-top:10px}
+
+/* ---------- صحنه ---------- */
+.stage{min-width:0;display:flex;flex-direction:column;gap:14px}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.crumb{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.pill{font-weight:800;font-size:12px;padding:3px 10px;border-radius:999px;background:var(--ink);color:var(--bg)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.legend b{font-weight:800}
+.legend .sw{display:inline-flex;align-items:center;gap:5px}
+.legend .dot{width:10px;height:10px;border-radius:3px;background:var(--dc)}
+.prog{display:flex;gap:6px;align-items:center}
+.prog button{width:22px;height:8px;border-radius:99px;border:0;background:var(--line);cursor:pointer;padding:0}
+.prog button.done{background:var(--muted)}
+.prog button.cur{background:var(--ink);width:34px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(18px,3.2vw,36px);min-height:540px}
+.scene{display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-size:13px;font-weight:700;color:var(--muted)}
+.scene h2{font-size:clamp(24px,3.4vw,36px);font-weight:800}
+.lead{font-size:clamp(16px,1.6vw,18px);max-width:66ch}
+.sub{color:var(--muted);max-width:66ch}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:28px;align-items:start}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.ghost{background:none;border:0;color:var(--muted);cursor:pointer;font-size:14px;text-decoration:underline;text-underline-offset:5px}
+.hint{font-size:13px;color:var(--muted)}
+
+.anchor{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;padding:8px 8px 8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--soft);font-weight:700}
+.anchor .img{font-size:24px;width:40px;height:40px;display:grid;place-items:center;border-radius:9px;background:var(--surface);border:1px solid var(--line);flex:none}
+.anchor small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+
+.check{border:1.5px dashed var(--ink);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.check > p{font-weight:700;display:flex;gap:10px;align-items:baseline}
+.check > p::before{content:"یادآوری";font-size:11px;color:var(--surface);background:var(--ink);padding:0 8px;border-radius:5px;flex:none}
+.check details{margin-top:6px}
+.check summary{cursor:pointer;font-size:14px;color:var(--muted);text-decoration:underline;text-underline-offset:5px}
+.check details p{margin-top:6px;font-size:15px}
+
+.play .a{animation:rise .45s cubic-bezier(.2,.75,.25,1) both;animation-delay:calc(var(--d,0) * 1ms)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.q{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.q > p{font-weight:700}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts.row{flex-direction:row;flex-wrap:wrap}
+.opt{text-align:start;padding:7px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font-size:14px;display:flex;gap:8px;align-items:baseline}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt:disabled{cursor:default}
+.opt.right{border:2px solid var(--ink);background:var(--soft);font-weight:700}
+.opt.right::before{content:"✓"}
+.opt.wrong{text-decoration:line-through;color:var(--muted)}
+.opt.wrong::before{content:"✗";display:inline-block}
+.why{font-size:14px;color:var(--muted)}
+
+/* درس ۱ */
+.shape{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,.8fr);gap:14px;align-items:center}
+.cases{display:flex;flex-direction:column;gap:10px}
+.case{border:1px solid var(--line);border-radius:12px;padding:8px 12px;display:flex;flex-direction:column;gap:4px}
+.ways{display:flex;flex-wrap:wrap;gap:6px}
+.way{font-size:12px;padding:1px 8px;border-radius:6px;background:var(--soft);border:1px solid var(--line)}
+.arrow{font-size:28px;color:var(--muted)}
+.named{border:2px solid var(--ink);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.named .lbl{font-size:12px;font-weight:700;color:var(--muted)}
+.named h3{font-size:26px}
+.mini{display:flex;flex-direction:column;align-items:flex-start;gap:6px;font-size:12px}
+.mini span{border:1.5px solid var(--ink);border-radius:4px;padding:0 7px}
+.mini .slotline{border-style:dashed}
+.quote{font-weight:800;font-size:clamp(21px,2.8vw,30px);line-height:1.6;max-width:34ch}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.vcard{border-radius:14px;padding:16px;border:1.5px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.vcard.yes{border:2px solid var(--ink)}
+.vcard.no{border-style:dashed}
+.vcard h3{font-size:18px}
+.vcard ul{margin:0;padding-right:18px;padding-left:0}
+.npsc{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:24px;align-items:start}
+.recipe{border:2px solid var(--ink);border-radius:6px;background:var(--surface);overflow:hidden}
+.recipe .hd{padding:8px 14px;border-bottom:2px solid var(--ink);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.band{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;width:100%;text-align:start;border:0;border-bottom:1px solid var(--line);background:var(--surface);padding:12px 14px;cursor:pointer;position:relative}
+.band:last-child{border-bottom:0}
+.band::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:6px;background:var(--bc)}
+.band .L{font-weight:800;font-size:26px;color:var(--bc);text-align:center}
+.band .tt{display:flex;flex-direction:column}
+.band .tt b{font-size:17px}
+.band .tt span{font-size:13px;color:var(--muted)}
+.band .ar{color:var(--muted)}
+.band[aria-pressed="true"]{background:var(--soft)}
+.recipe.testing .band:not(.shown) .tt{visibility:hidden}
+.recipe.testing .band:not(.shown) .ar::after{content:"بزن تا ببینی";font-size:12px}
+.recipe.testing .band:not(.shown) .ar span{display:none}
+.detail{border-radius:14px;border:2px solid var(--dc);padding:18px;display:flex;flex-direction:column;gap:10px;min-height:300px}
+.detail h3{font-size:22px;color:var(--dc)}
+.detail .row{display:grid;grid-template-columns:110px 1fr;gap:10px;font-size:15px}
+.detail .lab{font-size:12px;font-weight:700;color:var(--muted);padding-top:3px}
+.mnem{font-size:clamp(18px,2.2vw,22px);font-weight:700;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline}
+.mnem b{font-size:1.35em;font-weight:800}
+.reqs{display:flex;flex-wrap:wrap;gap:8px}
+.req{font-size:13px;font-weight:700;padding:3px 10px;border-radius:8px;border:1px solid var(--line);background:var(--soft)}
+.duel{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel h3{font-size:17px}
+.panel h3 small{display:block;font-size:13px;font-weight:400;color:var(--muted)}
+.mesh{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.node{aspect-ratio:1.6;border-radius:6px;border:1.5px solid var(--line);display:grid;place-items:center;font-size:11px;color:var(--muted);text-align:center;line-height:1.3}
+.node.touched{border-color:var(--ink);color:var(--ink);font-weight:700;background:repeating-linear-gradient(135deg,var(--soft) 0 5px,var(--surface) 5px 10px)}
+.play .node.touched{animation:touch .35s both;animation-delay:calc(var(--d,0) * 1ms)}
+@keyframes touch{from{background:var(--surface);border-color:var(--line);color:var(--muted)}}
+.meter{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.meter .tr{height:10px;border-radius:99px;background:var(--soft);overflow:hidden}
+.meter .tr i{display:block;height:100%;width:var(--w);background:var(--ink)}
+.play .meter .tr i{animation:grow 1s cubic-bezier(.3,.7,.3,1) both;animation-delay:calc(var(--d,0) * 1ms)}
+@keyframes grow{from{width:0}}
+.zoom{border-radius:14px;border:1.5px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:8px}
+.lvl{border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.lt{font-size:12px;font-weight:700;display:flex;justify-content:space-between;gap:8px;color:var(--muted)}
+.pat{border:2px solid var(--ink)}
+.pat > .lt{color:var(--ink)}
+.alg{border:1.5px dashed var(--muted)}
+.cls{display:flex;gap:6px;flex-wrap:wrap}
+.cls span{font-size:12px;padding:0 7px;border:1.5px solid var(--line);border-radius:4px}
+.cls .en{color:inherit}
+.pat .cls span{border-color:var(--ink)}
+.nots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.not{border-radius:12px;border:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:2px}
+.not h3{font-size:16px}
+.not p{font-size:14px}
+.sort{display:flex;flex-direction:column;gap:8px}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.srow .it{font-weight:700}
+.srow .fb{grid-column:1/-1;font-size:13px;color:var(--muted)}
+.demo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.machine{border:2px solid var(--ink);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mtitle{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;font-weight:800;font-size:18px}
+.mtitle small{font-size:12px;color:var(--muted);font-weight:700}
+.slot{border:2px dashed var(--ink);border-radius:12px;min-height:84px;display:grid;place-items:center;padding:12px}
+.cart{display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:10px;border:1.5px solid var(--ink);font-weight:700;background:var(--soft);animation:plug .3s ease-out both;direction:ltr}
+@keyframes plug{from{opacity:0;transform:translateY(-14px)}}
+.cart .ic{font-size:24px}
+.cart small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.picks{display:flex;flex-wrap:wrap;gap:8px}
+.pick{padding:5px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700;font-size:14px}
+.pick[aria-pressed="true"]{border-color:var(--ink);background:var(--soft)}
+.pick.new{border-style:dashed}
+.out{font-family:var(--f-mono);font-size:12.5px;padding:8px 12px;border-radius:8px;background:var(--soft);min-height:40px;direction:ltr;text-align:left;line-height:1.6}
+pre.code{margin:0;font-family:var(--f-mono);font-size:12.5px;line-height:1.7;padding:12px 0;border-radius:12px;background:var(--soft);border:1px solid var(--line);overflow-x:auto;direction:ltr;text-align:left}
+pre.code span{display:block;padding:0 14px;white-space:pre;border-left:3px solid transparent}
+pre.code span.on{background:var(--surface);border-left-color:var(--ink);font-weight:600}
+pre.code span.added{animation:rise .4s both}
+pre.code i{color:var(--muted)}
+pre.code b{font-weight:600}
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:stretch}
+.fbox{border-radius:14px;border:2px solid var(--fbc);padding:14px;display:flex;flex-direction:column;gap:4px}
+.fbox .num{font-size:12px;color:var(--fbc);font-weight:800}
+.fbox h3{font-size:17px}
+.fbox p{font-size:14px;color:var(--muted)}
+.farr{display:grid;place-items:center;font-size:24px;color:var(--muted)}
+.goals{display:grid;grid-template-columns:1fr 1fr;gap:4px 28px;margin:0;padding-right:20px;padding-left:0}
+.goals li{font-size:15px}
+.pre{display:flex;flex-wrap:wrap;gap:6px}
+.quiz{display:flex;flex-direction:column;gap:12px}
+.score{font-weight:800;font-size:19px}
+.flash{border:2px solid var(--ink);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.flash .ln{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:baseline;font-size:14px}
+.flash .ln > b{font-size:19px;font-weight:800}
+.locked{border:1.5px dashed var(--line);border-radius:10px;padding:16px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.plan{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.plan ol{margin:0;padding-right:20px;padding-left:0;display:flex;flex-direction:column;gap:2px;font-size:14px}
+
+/* درس ۲ */
+.house{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;max-width:520px}
+.floor{border:2px solid var(--ink);border-radius:8px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.floor.top{border-style:solid}
+.floor.base{background:repeating-linear-gradient(135deg,var(--soft) 0 6px,var(--surface) 6px 12px)}
+.floor .lbl{font-weight:800;margin-inline-end:6px}
+.letter{font-size:clamp(56px,8vw,84px);font-weight:800;line-height:1;font-family:var(--f-mono)}
+.prinhead{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.prinhead .t{display:flex;flex-direction:column;gap:2px}
+.rule{font-size:clamp(17px,1.9vw,21px);font-weight:700;border-inline-start:4px solid var(--ink);padding-inline-start:12px;max-width:60ch}
+.ba{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.ba > div{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ba h3{font-size:16px}
+.ba .bad h3::before{content:"✗ "}
+.ba .good h3::before{content:"✓ "}
+.ba .bad pre.code{border-style:dashed}
+.ba .good pre.code{border:2px solid var(--ink)}
+.effect{font-size:14px;color:var(--muted)}
+.xgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.xcard{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.xcard h3{font-size:17px;display:flex;gap:10px;align-items:center}
+.xcard h3 .img{font-size:22px;width:36px;height:36px;display:grid;place-items:center;border-radius:8px;background:var(--soft);border:1px solid var(--line);flex:none}
+.xcard p{font-size:14px}
+.xcard pre.code{font-size:12px}
+.links{display:flex;flex-direction:column;gap:10px}
+
+/* درس‌های ۳ تا ۱۶ */
+.fX{color:var(--beyond)}
+.phead{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.pimg{font-size:40px;width:70px;height:70px;display:grid;place-items:center;border-radius:16px;border:1px solid var(--line);background:var(--soft);flex:none}
+.phead .t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.phead .tagline{font-size:15px}
+.phead .tagline b{font-weight:800}
+.pcard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.pb{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;padding:12px 14px;padding-inline-start:20px;display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;min-width:0}
+.pb::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:6px;background:var(--bc)}
+.pb > .L{font-weight:800;font-size:22px;color:var(--bc);line-height:1.3}
+.pb .h{display:block;font-size:12px;font-weight:700;color:var(--muted)}
+.pb.wide{grid-column:1/-1}
+.pb ul{margin:2px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px;font-size:15px}
+.pb li.plus::before{content:"+ ";font-weight:800}
+.pb li.minus::before{content:"− ";font-weight:800}
+.pb pre.code{margin-top:8px}
+.roles{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
+.roles .rl{font-size:12px;color:var(--muted)}
+.roles span.r{font-family:var(--f-mono);font-size:12px;border:1.5px solid var(--ink);border-radius:4px;padding:0 7px;direction:ltr}
+.famcols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.famcol{border:2px solid var(--fc);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.famcol h3{color:var(--fc);font-size:20px}
+.famcol .big{font-size:30px;line-height:1}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th,table.t td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+table.t th{font-size:12px;color:var(--muted);font-weight:700;background:var(--soft)}
+table.t tr:last-child td{border-bottom:0}
+.sym{width:110px;height:24px;display:block;color:var(--ink)}
+.ia{border:2px solid var(--ink);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ia .row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.log{font-size:14px;display:flex;flex-direction:column;gap:4px;max-height:240px;overflow:auto;padding:10px 12px;border-radius:10px;background:var(--soft);min-height:48px}
+.log div{animation:rise .3s both}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;border:2px solid var(--ink);font-weight:800}
+.node2{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;border:1.5px solid var(--line);font-family:var(--f-mono);font-size:12px;direction:ltr;transition:background .2s,border-color .2s}
+.node2 small{font-family:var(--f-body);font-size:11px;font-weight:800}
+.node2.hl{border:2px solid var(--ink);background:var(--soft);font-weight:600}
+.casegrid{direction:ltr;display:flex;flex-direction:column;gap:8px;overflow-x:auto;padding:4px}
+.casegrid .crow{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.casegrid .ar{color:var(--muted);font-family:var(--f-mono)}
+.grid-dots{display:grid;gap:4px;justify-content:start}
+.grid-dots i{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--ink);background:var(--soft)}
+.bigno{font-size:34px;font-weight:800;line-height:1}
+.ping{animation:ping .6s ease-out}
+@keyframes ping{0%{transform:scale(1)}40%{transform:scale(1.08);background:var(--soft)}100%{transform:scale(1)}}
+.cl{display:flex;flex-direction:column;gap:6px}
+.cl label{display:flex;gap:10px;align-items:baseline;font-size:15px;cursor:pointer}
+.cl input{width:18px;height:18px;flex:none;accent-color:var(--ink)}
+.txt{font:inherit;padding:8px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+.steps2{margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:6px}
+.cards3{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.c3{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.c3 h3{font-size:16px;display:flex;gap:8px;align-items:center}
+.c3 h3 .img{font-size:20px}
+.c3 p{font-size:14px}
+.c3 .use{font-size:13px;color:var(--muted)}
+
+@media (max-width:980px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  .map{position:static;max-height:none}
+  .map > summary{cursor:pointer}
+  .two,.npsc,.demo{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:640px){
+  .vs,.duel,.nots,.goals,.ba,.xgrid,.pcard,.famcols,.ia .row2{grid-template-columns:minmax(0,1fr)}
+  .shape,.flow{grid-template-columns:minmax(0,1fr)}
+  .arrow,.farr{transform:rotate(-90deg);justify-self:center}
+  .card{min-height:0}
+  .prog button{width:14px}.prog button.cur{width:24px}
+}
+@media (prefers-reduced-motion:reduce){ .play *, .cart, pre.code span.added{animation:none!important} }
+.bookq{margin:0 0 14px;padding:12px 16px;border-inline-start:4px solid var(--ink);background:var(--soft);border-radius:10px;font-weight:600;line-height:2}
+.bookq .bql{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:2px}
+</style>
+
+<div class="wrap" dir="rtl" lang="fa">
+
+<!-- ================= نقشهٔ دوره ================= -->
+<details class="map" id="map" open>
+  <summary><div class="brand"><b>اطلس الگوهای طراحی</b><span>۱۶ درس تصویری بر پایهٔ جزوهٔ الگوهای طراحی</span></div></summary>
+
+  <div class="fam" style="--fc:var(--found)"><i></i>مبانی</div>
+  <details class="lesson" data-lesson="1" style="--fc:var(--found)" open>
+    <summary><span class="n">۱</span><span>الگوی طراحی چیست؟</span><span class="st"></span></summary>
+    <div class="tags"><span class="tag">🃏 کارت دستور پخت</span><button class="open" data-go="1">باز کن</button></div>
+  </details>
+  <details class="lesson" data-lesson="2" style="--fc:var(--found)" open>
+    <summary><span class="n">۲</span><span>اصول طراحی <span class="en">SOLID+</span></span><span class="st"></span></summary>
+    <div class="tags"><span class="tag">پنج قانون خانه</span><span class="tag" dir="ltr">S👨‍🍳 O⚡ L🐧 I🎛️ D💡</span><button class="open" data-go="2">باز کن</button></div>
+  </details>
+  <details class="lesson" data-lesson="3" style="--fc:var(--found)"><summary><span class="n">۳</span><span>سه خانواده و خواندن UML</span><span class="st"></span></summary><div class="tags"><span class="tag">تولد · بدن · رفتار</span><button class="open" data-go="3">باز کن</button></div></details>
+
+  <div class="fam" style="--fc:var(--create)"><i></i>ایجادگرا <em>· اشیا چطور ساخته می‌شوند</em></div>
+  <details class="lesson" data-lesson="4" style="--fc:var(--create)"><summary><span class="n">۴</span><span>Singleton · Factory Method</span><span class="st"></span></summary><div class="tags"><span class="tag">👑 تنها پادشاه</span><span class="tag">🏭 زیرکلاس محصول را انتخاب می‌کند</span><button class="open" data-go="4">باز کن</button></div></details>
+  <details class="lesson" data-lesson="5" style="--fc:var(--create)"><summary><span class="n">۵</span><span>Abstract Factory · Builder · Prototype</span><span class="st"></span></summary><div class="tags"><span class="tag">🎨 کیت هماهنگ تم</span><span class="tag">🥪 ساندویچ مرحله‌به‌مرحله</span><span class="tag">🐑 گوسفند شبیه‌سازی‌شده</span><button class="open" data-go="5">باز کن</button></div></details>
+
+  <div class="fam" style="--fc:var(--struct)"><i></i>ساختاری <em>· اجزا چطور کنار هم می‌نشینند</em></div>
+  <details class="lesson" data-lesson="6" style="--fc:var(--struct)"><summary><span class="n">۶</span><span>Adapter · Facade</span><span class="st"></span></summary><div class="tags"><span class="tag">🔌 تبدیل دوشاخه</span><span class="tag">🛎️ پذیرش هتل</span><button class="open" data-go="6">باز کن</button></div></details>
+  <details class="lesson" data-lesson="7" style="--fc:var(--struct)"><summary><span class="n">۷</span><span>Decorator · Proxy</span><span class="st"></span></summary><div class="tags"><span class="tag">🎁 لایه‌های کادوپیچ</span><span class="tag">🛡️ محافظ شخصی</span><button class="open" data-go="7">باز کن</button></div></details>
+  <details class="lesson" data-lesson="8" style="--fc:var(--struct)"><summary><span class="n">۸</span><span>Composite · Bridge · Flyweight</span><span class="st"></span></summary><div class="tags"><span class="tag">🌳 پوشه در پوشه</span><span class="tag">🌉 کنترل × تلویزیون</span><span class="tag">🪶 حروف مشترک</span><button class="open" data-go="8">باز کن</button></div></details>
+
+  <div class="fam" style="--fc:var(--behave)"><i></i>رفتاری <em>· اشیا چطور با هم حرف می‌زنند</em></div>
+  <details class="lesson" data-lesson="9" style="--fc:var(--behave)"><summary><span class="n">۹</span><span>Strategy · Observer</span><span class="st"></span></summary><div class="tags"><span class="tag">🧭 انتخاب مسیر</span><span class="tag">📣 دکمهٔ دنبال‌کردن</span><button class="open" data-go="9">باز کن</button></div></details>
+  <details class="lesson" data-lesson="10" style="--fc:var(--behave)"><summary><span class="n">۱۰</span><span>State · Template Method · Iterator</span><span class="st"></span></summary><div class="tags"><span class="tag">🚦 چراغ راهنما</span><span class="tag">📝 فرم جای‌خالی</span><span class="tag">⏭️ «بعدی» در پلی‌لیست</span><button class="open" data-go="10">باز کن</button></div></details>
+  <details class="lesson" data-lesson="11" style="--fc:var(--behave)"><summary><span class="n">۱۱</span><span>Command · Chain · Mediator</span><span class="st"></span></summary><div class="tags"><span class="tag">🧾 برگهٔ سفارش</span><span class="tag">☎️ ارجاع پشتیبانی</span><span class="tag">🗼 برج مراقبت</span><button class="open" data-go="11">باز کن</button></div></details>
+  <details class="lesson" data-lesson="12" style="--fc:var(--behave)"><summary><span class="n">۱۲</span><span>Visitor · Memento · Interpreter</span><span class="st"></span></summary><div class="tags"><span class="tag">🕵️ بازرس</span><span class="tag">💾 ذخیرهٔ بازی</span><span class="tag">🗣️ زبان کوچک</span><button class="open" data-go="12">باز کن</button></div></details>
+
+  <div class="fam" style="--fc:var(--beyond)"><i></i>فراتر از ۲۳ الگو <em>· پروژه‌های واقعی</em></div>
+  <details class="lesson" data-lesson="13" style="--fc:var(--beyond)"><summary><span class="n">۱۳</span><span>الگوهای معماری</span><span class="st"></span></summary><div class="tags"><span class="tag">Layers · MVC · Repository · DI · CQRS</span><button class="open" data-go="13">باز کن</button></div></details>
+  <details class="lesson" data-lesson="14" style="--fc:var(--beyond)"><summary><span class="n">۱۴</span><span>انتخاب الگو و ضدالگوها</span><span class="st"></span></summary><div class="tags"><span class="tag">🧲 اول نیرو</span><button class="open" data-go="14">باز کن</button></div></details>
+  <details class="lesson" data-lesson="15" style="--fc:var(--beyond)"><summary><span class="n">۱۵</span><span>مطالعهٔ موردی: فروشگاه</span><span class="st"></span></summary><div class="tags"><span class="tag">🛒 شش الگو، یک سفارش</span><button class="open" data-go="15">باز کن</button></div></details>
+  <details class="lesson" data-lesson="16" style="--fc:var(--beyond)"><summary><span class="n">۱۶</span><span>آزمون، بازبینی و مرور نهایی</span><span class="st"></span></summary><div class="tags"><span class="tag">هر ۲۳ الگو در یک صفحه</span><button class="open" data-go="16">باز کن</button></div></details>
+  <p class="maphint">رنگ در این نقشه یعنی خانوادهٔ الگو. هر الگو یک تصویر دارد که تا پایان دوره همراهش می‌ماند.</p>
+</details>
+
+<!-- ================= صحنه ================= -->
+<main class="stage">
+  <div class="topbar">
+    <div class="crumb"><span class="pill" id="lpill"></span><span id="ltitle"></span></div>
+    <div class="prog" id="prog" aria-label="صحنه‌ها"></div>
+  </div>
+  <div class="legend" id="legend1" aria-label="کلید رنگ‌ها">
+    <span>کلید رنگ:</span>
+    <span class="sw" style="--dc:var(--n)"><i class="dot"></i><b class="N">ن</b>ام</span>
+    <span class="sw" style="--dc:var(--p)"><i class="dot"></i><b class="P">م</b>سئله</span>
+    <span class="sw" style="--dc:var(--s)"><i class="dot"></i><b class="S">ر</b>اه‌حل</span>
+    <span class="sw" style="--dc:var(--c)"><i class="dot"></i><b class="C">پ</b>یامد</span>
+    <span class="sw"><span class="key">هایلایت</span> = واژهٔ کلیدی</span>
+    <span>بقیه خاکستری است.</span>
+  </div>
+  <div class="legend" id="legend2" aria-label="کلید رنگ‌ها" hidden>
+    <span>کلید رنگ:</span>
+    <span>نام الگوها به رنگ خانواده‌شان:</span>
+    <span class="sw" style="--dc:var(--create)"><i class="dot"></i>ایجادگرا</span>
+    <span class="sw" style="--dc:var(--struct)"><i class="dot"></i>ساختاری</span>
+    <span class="sw" style="--dc:var(--behave)"><i class="dot"></i>رفتاری</span>
+    <span class="sw"><span class="key">هایلایت</span> = واژهٔ کلیدی</span>
+    <span>پنج اصل با <b>تصویر</b> به خاطر سپرده می‌شوند، نه با رنگ.</span>
+  </div>
+  <div class="legend" id="legendP" aria-label="کلید رنگ‌ها" hidden>
+    <span>کلید رنگ:</span>
+    <span>کارت هر الگو:</span>
+    <span class="sw" style="--dc:var(--n)"><i class="dot"></i><b class="N">ن</b>ام</span>
+    <span class="sw" style="--dc:var(--p)"><i class="dot"></i><b class="P">م</b>سئله</span>
+    <span class="sw" style="--dc:var(--s)"><i class="dot"></i><b class="S">ر</b>اه‌حل</span>
+    <span class="sw" style="--dc:var(--c)"><i class="dot"></i><b class="C">پ</b>یامد</span>
+    <span>· نام الگو به رنگ خانواده‌اش:</span>
+    <span class="sw" style="--dc:var(--create)"><i class="dot"></i>ایجادگرا</span>
+    <span class="sw" style="--dc:var(--struct)"><i class="dot"></i>ساختاری</span>
+    <span class="sw" style="--dc:var(--behave)"><i class="dot"></i>رفتاری</span>
+    <span class="sw" style="--dc:var(--beyond)"><i class="dot"></i>معماری</span>
+  </div>
+
+  <div class="card" id="card">
+
+  <!-- ==================== درس ۱ ==================== -->
+  <div class="lessonview" data-lesson="1" data-title="الگوی طراحی چیست؟">
+
+  <section class="scene" data-title="اول حدس بزن">
+    <div class="eyebrow a">صحنهٔ ۱ · قبل از یادگیری حدس بزن</div>
+    <h2 class="a" style="--d:60">یک حدس بزن. اشتباه بودنش اشکالی ندارد.</h2>
+    <p class="sub a" style="--d:120">حدس‌زدن قبل از یادگیری باعث می‌شود جواب درست بهتر در ذهن بماند، حتی وقتی حدست غلط باشد.</p>
+    <div class="q a" style="--d:200">
+      <p>یک فروشگاه پرداخت با کارت، کیف پول یا درگاه بانکی دارد. یک پیک هزینهٔ ارسال عادی، فوری یا همان‌روز می‌گیرد. یک فروشگاه دیگر بدون تخفیف، ۱۰٪ تخفیف یا قیمت ویژهٔ اعضا می‌دهد. وجه مشترک این سه چیست؟</p>
+      <div class="opts">
+        <button class="opt" data-ok="0">همه به پایگاه داده نیاز دارند</button>
+        <button class="opt" data-ok="1">یک کار که به چند روش قابل تعویض انجام می‌شود</button>
+        <button class="opt" data-ok="0">همه به یک شیء سراسری نیاز دارند</button>
+      </div>
+      <p class="why" hidden>جواب: یک کار، چند روش قابل تعویض. صحنهٔ ۲ نشان می‌دهد چرا مهم است.</p>
+    </div>
+    <div class="q a" style="--d:280">
+      <p>«الگوی طراحی» بیشتر شبیه کدام است؟</p>
+      <div class="opts">
+        <button class="opt" data-ok="0">یک تکه کد آماده برای کپی</button>
+        <button class="opt" data-ok="0">یک کتابخانه که نصب می‌کنی</button>
+        <button class="opt" data-ok="1">یک روش نام‌دار برای چیدن اجزای طراحی</button>
+      </div>
+      <p class="why" hidden>جواب: روش نام‌دار چیدن اجزا. صحنهٔ ۳ توضیحش می‌دهد.</p>
+    </div>
+  </section>
+
+  <section class="scene" data-title="یک شکل، سه جا" hidden>
+    <div class="eyebrow a">صحنهٔ ۲ · جرقه</div>
+    <h2 class="a" style="--d:60">سه برنامهٔ متفاوت. یک شکلِ مسئله.</h2>
+    <div class="shape">
+      <div class="cases">
+        <div class="case a" style="--d:150"><b>پرداخت سفارش</b><div class="ways"><span class="way">کارت</span><span class="way">کیف پول</span><span class="way">درگاه بانکی</span></div></div>
+        <div class="case a" style="--d:250"><b>محاسبهٔ هزینهٔ ارسال</b><div class="ways"><span class="way">عادی</span><span class="way">فوری</span><span class="way">همان‌روز</span></div></div>
+        <div class="case a" style="--d:350"><b>اعمال تخفیف</b><div class="ways"><span class="way">بدون تخفیف</span><span class="way">۱۰٪</span><span class="way">قیمت اعضا</span></div></div>
+      </div>
+      <div class="arrow a" style="--d:550" aria-hidden="true">←</div>
+      <div class="named a" style="--d:700">
+        <span class="lbl">شکل مشترک</span>
+        <p>یک کار. چند روش برای انجامش. روش را <b>هنگام اجرا</b> انتخاب کن و بعداً روش تازه اضافه کن.</p>
+        <div class="mini" aria-label="نمودار: کسی که کار را انجام می‌دهد یک جای خالی دارد و هر روشی که در آن جا شود قابل وصل است">
+          <span>صندوق پرداخت <span class="en">Checkout</span></span>
+          <span class="slotline">یک «روش» نگه می‌دارد ⇣</span>
+          <span>کارت · کیف پول · بانک …</span>
+        </div>
+        <span class="lbl" style="margin-top:4px">نامش</span>
+        <h3><span class="key">Strategy</span> <span class="en">راهبرد</span></h3>
+      </div>
+    </div>
+    <p class="lead a" style="--d:900">برنامه‌نویس‌ها بارها با همین شکل روبه‌رو شدند. بهترین جواب یک بار به شکل کلی نوشته شد و اسم گرفت. چنین جواب نام‌دار و قابل‌استفاده‌ای یعنی <span class="key">الگوی طراحی</span>.</p>
+    <div class="check a" style="--d:1000">
+      <p>چرا مفید است که این شکل اسم داشته باشد؟</p>
+      <details><summary>اول فکر کن، بعد بزن تا ببینی</summary><p>دفعهٔ بعد سریع‌تر تشخیصش می‌دهی، و یک کلمه («Strategy») کل راه‌حل را به تیم می‌گوید.</p></details>
+    </div>
+  </section>
+
+  <section class="scene" data-title="تعریف" hidden>
+    <div class="eyebrow a">صحنهٔ ۳ · تعریف</div>
+    <p class="quote a" style="--d:60">الگوی طراحی یک راه‌حل <span class="key">عمومی</span> و <span class="key">نام‌گذاری‌شده</span> برای <span class="key">مسئله‌ای پرتکرار</span> در یک <span class="key">زمینه مشخص</span> است؛ نه قطعه‌کد آماده و نه چارچوبی که بدون تحلیل در هر پروژه کپی شود.</p>
+    <div class="anchor a" style="--d:200"><span class="img" aria-hidden="true">🃏</span><span>الگو یعنی کارت دستور پخت<small>تصویر این درس. در صحنهٔ ۴ دوباره می‌آید.</small></span></div>
+    <div class="vs">
+      <div class="vcard yes a" style="--d:300">
+        <h3>✓ مثل دستور پخت</h3>
+        <ul><li>ایده و مراحل را می‌دهد</li><li>مواد خودت را می‌گذاری: کلاس‌ها و نام‌های خودت</li><li>با آشپزخانهٔ خودت تطبیقش می‌دهی: پروژهٔ خودت</li></ul>
+      </div>
+      <div class="vcard no a" style="--d:400">
+        <h3>✗ نه غذای آمادهٔ یخ‌زده</h3>
+        <ul><li>تکه کد آماده برای کپی نیست</li><li>چارچوبی نیست که بی‌تحلیل در هر پروژه کپی شود</li><li>چیزی نیست که بدون فکر استفاده شود</li></ul>
+      </div>
+    </div>
+    <div class="check a" style="--d:500">
+      <p>هم‌تیمی‌ات یک کلاس پرداخت را بدون تغییر از پروژهٔ قبلی کپی می‌کند و می‌گوید «از الگو استفاده کردم». درست می‌گوید؟</p>
+      <details><summary>اول فکر کن، بعد بزن تا ببینی</summary><p>نه واقعاً. او کد را دوباره استفاده کرده. الگو دستور پخت است: نقش‌ها و نام‌ها را با مسئلهٔ تازه جور می‌کنی.</p></details>
+    </div>
+  </section>
+
+  <section class="scene" data-title="کارت چهاربخشی" hidden>
+    <div class="eyebrow a">صحنهٔ ۴ · هر الگو چهار بخش دارد</div>
+    <h2 class="a" style="--d:60">هر الگو را مثل کارت دستور پخت بخوان.</h2>
+    <p class="mnem a" style="--d:140"><span>«<b class="N">ن</b>سخه را</span><span><b class="P">م</b>کانیکی</span><span><b class="S">ر</b>ونویسی نکن؛</span><span><b class="C">پ</b>خته‌اش کن»</span></p>
+    <p class="hint a" style="--d:180">حرف اول واژه‌های رنگی = نام · مسئله · راه‌حل · پیامد <span class="en">(Name · Problem · Solution · Consequences)</span></p>
+    <div class="npsc">
+      <div class="recipe a" style="--d:240" id="recipe">
+        <div class="hd"><b>🃏 کارت الگو</b><button class="ghost" id="testme">واژه‌ها را پنهان کن و از من بپرس</button></div>
+        <button class="band" style="--bc:var(--n)" data-part="0" aria-pressed="true"><span class="L">ن</span><span class="tt"><b>نام</b><span>یک واژهٔ مشترک برای تیم</span></span><span class="ar"><span>←</span></span></button>
+        <button class="band" style="--bc:var(--p)" data-part="1" aria-pressed="false"><span class="L">م</span><span class="tt"><b>زمینه و مسئله</b><span>کِی پیش می‌آید؟</span></span><span class="ar"><span>←</span></span></button>
+        <button class="band" style="--bc:var(--s)" data-part="2" aria-pressed="false"><span class="L">ر</span><span class="tt"><b>راه‌حل</b><span>نقش‌ها و همکاری‌شان</span></span><span class="ar"><span>←</span></span></button>
+        <button class="band" style="--bc:var(--c)" data-part="3" aria-pressed="false"><span class="L">پ</span><span class="tt"><b>پیامدها</b><span>چه می‌گیری، چه می‌پردازی</span></span><span class="ar"><span>←</span></span></button>
+      </div>
+      <div class="detail a" id="detail" style="--d:320;--dc:var(--n)" aria-live="polite"></div>
+    </div>
+    <p class="hint a" style="--d:400">این چهار رنگ در کل دوره، حتی در آزمون‌ها، همین چهار بخش را نشان می‌دهند.</p>
+  </section>
+
+  <section class="scene" data-title="چرا مهم است" hidden>
+    <div class="eyebrow a">صحنهٔ ۵ · چرا اهمیت دارد؟</div>
+    <h2 class="a" style="--d:60">در سیستم‌های واقعی، نیازمندی‌ها تغییر می‌کنند. طراحی مناسب، هزینه تغییر را کاهش می‌دهد.</h2>
+    <div class="reqs a" style="--d:150"><span class="req">+ روش پرداخت جدید</span><span class="req">سرویس خارجی عوض شد</span><span class="req">قالب گزارش تغییر کرد</span><span class="req">اجزا باید مستقل رشد کنند</span></div>
+    <p class="sub a" style="--d:220">یک تغییر یکسان می‌رسد: «پرداخت با کیف پول اضافه شود». خانه‌های راه‌راه یعنی کدی که باید ویرایش شود.</p>
+    <div class="duel">
+      <div class="panel a" style="--d:300">
+        <h3>طراحی درهم<small>تغییر همه‌جا پخش می‌شود</small></h3>
+        <div class="mesh">
+          <div class="node touched" style="--d:500">سبد</div><div class="node touched" style="--d:580">پرداخت</div><div class="node touched" style="--d:660">سفارش</div><div class="node touched" style="--d:740">ایمیل</div>
+          <div class="node touched" style="--d:820">مالیات</div><div class="node touched" style="--d:900">رابط کاربری</div><div class="node">گزارش</div><div class="node touched" style="--d:980">تست‌ها</div>
+        </div>
+        <div class="meter"><span>هزینهٔ تغییر: ۷ بخش از ۸ ویرایش شد</span><div class="tr"><i style="--w:88%;--d:500"></i></div></div>
+      </div>
+      <div class="panel a" style="--d:380">
+        <h3>طراحی با الگو<small>تغییر فقط یک جا می‌نشیند</small></h3>
+        <div class="mesh">
+          <div class="node">سبد</div><div class="node touched" style="--d:600">+ کیف پول</div><div class="node">سفارش</div><div class="node">ایمیل</div>
+          <div class="node">مالیات</div><div class="node">رابط کاربری</div><div class="node">گزارش</div><div class="node">تست‌ها</div>
+        </div>
+        <div class="meter"><span>هزینهٔ تغییر: یک بخش تازه، هیچ ویرایشی</span><div class="tr"><i style="--w:12%;--d:600"></i></div></div>
+      </div>
+    </div>
+    <p class="lead a" style="--d:1100">دلیل دوم: الگوها تجربه‌های تثبیت‌شده را به <span class="key">زبان قابل‌انتقال</span> تبدیل می‌کنند و کمک می‌کنند به‌جای تمرکز صرف بر جزئیات پیاده‌سازی، درباره ساختار راه‌حل گفت‌وگو کنیم.</p>
+    <div class="check a" style="--d:1200">
+      <p>دو دلیل اهمیت الگوها را بگو.</p>
+      <details><summary>اول فکر کن، بعد بزن تا ببینی</summary><p>۱. تغییر را ارزان‌تر می‌کنند. ۲. به تیم زبان مشترک می‌دهند.</p></details>
+    </div>
+  </section>
+
+  <section class="scene" data-title="الگو چه نیست" hidden>
+    <div class="eyebrow a">صحنهٔ ۶ · قاطی نکن</div>
+    <h2 class="a" style="--d:60">الگو در سطح بزرگنمایی میانی زندگی می‌کند.</h2>
+    <div class="two">
+      <div class="zoom a" style="--d:150" aria-label="سطوح بزرگنمایی: معماری شامل الگو است و الگو شامل الگوریتم">
+        <div class="lt"><span>معماری</span><span>کل سیستم</span></div>
+        <div class="cls"><span>لایهٔ نمایش</span><span>لایهٔ کاربرد</span><span>پایگاه داده</span></div>
+        <div class="lvl pat a" style="--d:350"><div class="lt"><span>الگو</span><span>چند کلاس که با هم کار می‌کنند</span></div>
+          <div class="cls"><span class="en">Checkout</span><span class="en">«interface» PaymentMethod</span><span class="en">CardPayment</span><span class="en">WalletPayment</span></div>
+          <div class="lvl alg a" style="--d:550"><div class="lt"><span>الگوریتم</span><span>گام‌های داخل یک متد</span></div>
+            <div class="cls"><span>۱. بررسی کارت ← ۲. افزودن کارمزد ← ۳. برداشت</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="nots">
+        <div class="not a" style="--d:650"><h3>در برابر الگوریتم</h3><p>الگو معمولاً ساختار همکاری اجزا را توصیف می‌کند؛ الگوریتم مراحل محاسباتی را.</p></div>
+        <div class="not a" style="--d:720"><h3>در برابر کتابخانه</h3><p>الگو ایده طراحی است؛ کتابخانه کد قابل فراخوانی و اجرا ارائه می‌دهد.</p></div>
+        <div class="not a" style="--d:790"><h3>در برابر معماری</h3><p>الگو معمولاً مسئله‌ای محدودتر از معماری کل سیستم را حل می‌کند.</p></div>
+        <div class="not a" style="--d:860"><h3>در برابر قانون اجباری</h3><p>الگو گزینه‌ای برای تصمیم آگاهانه است، نه الزام همیشگی.</p></div>
+      </div>
+    </div>
+    <div class="q a" style="--d:950">
+      <p>دسته‌بندی کن: الگو هست یا نه؟</p>
+      <div class="sort" id="sort1"></div>
+    </div>
+  </section>
+
+  <section class="scene" data-title="ببین کار می‌کند" hidden>
+    <div class="eyebrow a">صحنهٔ ۷ · مثال جزوه، زنده</div>
+    <h2 class="a" style="--d:60">روش پرداخت را عوض کن. صندوق هیچ‌وقت تغییر نمی‌کند.</h2>
+    <p class="sub a" style="--d:120">جزوه: اگر سامانه باید بین پرداخت با کارت، کیف پول و درگاه بانکی انتخاب کند، مسئله اصلی «قابلیت تعویض الگوریتم پرداخت» است؛ Strategy می‌تواند گزینه مناسبی باشد.</p>
+    <div class="demo">
+      <div class="machine a" style="--d:200">
+        <div class="mtitle"><span>صندوق پرداخت <span class="en">Checkout</span></span><small id="unchanged"></small></div>
+        <div class="slot" id="slot" aria-live="polite"></div>
+        <div class="picks" id="picks"></div>
+        <div class="out" id="out"></div>
+        <p class="hint">یک روش دیگر را در جای خالی بگذار. بعد یک روش کاملاً تازه اضافه کن.</p>
+      </div>
+      <pre class="code a" style="--d:300" id="code" aria-label="شبه‌کد"></pre>
+    </div>
+    <div class="check a" style="--d:400">
+      <p>چرا وقتی کارت هدیه را اضافه کردی، صندوق به هیچ تغییری نیاز نداشت؟</p>
+      <details><summary>اول فکر کن، بعد بزن تا ببینی</summary><p>صندوق فقط رابط <span class="en">PaymentMethod</span> را می‌شناسد، نه هیچ کلاس مشخصی. هر کلاس تازه‌ای که با این رابط جور باشد، فقط وصل می‌شود.</p></details>
+    </div>
+  </section>
+
+  <section class="scene" data-title="چطور مطالعه کنیم" hidden>
+    <div class="eyebrow a">صحنهٔ ۸ · نکتهٔ مطالعهٔ جزوه</div>
+    <h2 class="a" style="--d:60">الگوها را مثل دستورالعمل حفظ نکن.</h2>
+    <p class="lead a" style="--d:120">برای هر الگو اول <span class="key">نیروی محرک مسئله</span> را بفهم. بعد سراغ کلاس‌ها و پیامدها برو. همان کارت است، به ترتیب خوانده‌شده:</p>
+    <div class="flow">
+      <div class="fbox a" style="--d:220;--fbc:var(--p)"><span class="num">م · نیرو</span><h3>چه چیزی تغییر می‌کند یا اذیت می‌کند؟</h3><p>«روش‌های پرداخت تازه مدام می‌آیند و صندوق مدام خراب می‌شود.»</p></div>
+      <div class="farr a" style="--d:300" aria-hidden="true">←</div>
+      <div class="fbox a" style="--d:380;--fbc:var(--s)"><span class="num">ر · ساختار</span><h3>کدام نقش‌ها درستش می‌کنند؟</h3><p>یک رابط، یک کلاس برای هر روش، صندوق یکی را نگه می‌دارد.</p></div>
+      <div class="farr a" style="--d:460" aria-hidden="true">←</div>
+      <div class="fbox a" style="--d:540;--fbc:var(--c)"><span class="num">پ · پیامد</span><h3>هزینه‌اش چیست؟</h3><p>کلاس‌های بیشتر، و کسی باید روش را انتخاب کند. اینجا می‌ارزد.</p></div>
+    </div>
+    <h3 class="a" style="--d:640;font-size:18px">در پایان دوره می‌توانی…</h3>
+    <ul class="goals a" style="--d:700">
+      <li>مسئلهٔ طراحی را از مسئلهٔ صرفاً کدنویسی جدا کنی</li>
+      <li>الگو را بر اساس تغییرپذیری، وابستگی‌ها و هزینهٔ نگهداری انتخاب کنی</li>
+      <li>نمودار کلاس را بخوانی و نقش‌ها را تشخیص دهی</li>
+      <li>نمونه‌های ساده بسازی و مزایا و محدودیت‌ها را بسنجی</li>
+      <li>از استفادهٔ نمایشی یا بیش‌ازحد الگوها دوری کنی</li>
+    </ul>
+    <div class="a" style="--d:780;display:flex;flex-direction:column;gap:6px"><span class="eyebrow">پیش‌نیازها</span>
+      <div class="pre"><span class="tag">برنامه‌نویسی شیءگرا</span><span class="tag">کلاس و شیء</span><span class="tag">وراثت</span><span class="tag">کپسوله‌سازی</span><span class="tag">چندریختی</span><span class="tag">رابط <span class="en">Interface</span></span><span class="tag">مبانی UML</span></div>
+    </div>
+  </section>
+
+  <section class="scene" data-title="خودت را بسنج" hidden>
+    <div class="eyebrow a">صحنهٔ ۹ · خودت را بسنج</div>
+    <div class="two">
+      <div class="quiz" data-quiz="1">
+        <h2 class="a" style="--d:60">اول به یاد بیاور، بعد مرور کن</h2>
+        <p class="sub a" style="--d:120">از حافظه جواب بده. کارت خلاصه بعد از آخرین سؤال باز می‌شود.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="locked a" style="--d:200" data-locked="1">
+          <span>🃏 کارت خلاصهٔ درس ۱ تا پایان آزمون پنهان است. بیرون‌کشیدن جواب از حافظه همان چیزی است که آن را ماندگار می‌کند.</span>
+          <button class="ghost" data-peek="1">با این حال نشانم بده</button>
+        </div>
+        <div class="flash" data-flash="1" hidden>
+          <div class="eyebrow">🃏 کارت درس ۱</div>
+          <div class="ln"><b>≡</b><span><b>الگو</b> = راه‌حل عمومی و نام‌دار برای مسئله‌ای پرتکرار در یک زمینه. دستور پخت، نه غذای یخ‌زده.</span></div>
+          <div class="ln"><b class="N">ن</b><span>نام: واژهٔ مشترک تیم</span></div>
+          <div class="ln"><b class="P">م</b><span>زمینه و مسئله: کِی پیش می‌آید</span></div>
+          <div class="ln"><b class="S">ر</b><span>راه‌حل: نقش‌ها، مسئولیت‌ها و همکاری‌شان</span></div>
+          <div class="ln"><b class="C">پ</b><span>پیامدها: مزایا، هزینه‌ها، محدودیت‌ها</span></div>
+          <div class="ln"><b>↕</b><span>سطح میانی: نه الگوریتم، نه کتابخانه، نه معماری، نه قانون</span></div>
+          <div class="ln"><b>←</b><span>ترتیب مطالعه: نیرو ← ساختار ← پیامد</span></div>
+        </div>
+        <div class="plan a" style="--d:300">
+          <span class="eyebrow">برنامهٔ مرور فاصله‌دار</span>
+          <p style="font-size:14px">در این روزها برگرد و فقط همین آزمون را با کارت پنهان دوباره بده. هر بار حدود ۲ دقیقه.</p>
+          <ol data-plan="1"></ol>
+          <p class="hint">درس ۲ هم با دو سؤال از همین درس شروع می‌شود.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <!-- ==================== درس ۲ ==================== -->
+  <div class="lessonview" data-lesson="2" data-title="اصول طراحی: SOLID و اصول تکمیلی" hidden>
+
+  <section class="scene" data-title="گرم‌کردن">
+    <div class="eyebrow a">صحنهٔ ۱ · گرم‌کردن: دو سؤال از درس ۱، یک حدس از درس ۲</div>
+    <h2 class="a" style="--d:60">قبل از شروع، از حافظه جواب بده.</h2>
+    <p class="sub a" style="--d:120">برگشتن به درس قبل بعد از چند روز، و حدس‌زدن دربارهٔ درس تازه، هر دو یادگیری را ماندگارتر می‌کنند.</p>
+    <div data-quickq="warm"></div>
+  </section>
+
+  <section class="scene" data-title="پی و ساختمان" hidden>
+    <div class="eyebrow a">صحنهٔ ۲ · اصول، پیِ الگوها</div>
+    <h2 class="a" style="--d:60">الگوها جایگزین اصول طراحی نیستند.</h2>
+    <p class="lead a" style="--d:120">اصول به ما می‌گویند <span class="key">چرا</span> یک الگو مفید است و <span class="key">کِی</span> استفاده از آن توجیه دارد. الگو ساختمان است؛ اصول پی آن.</p>
+    <div class="house a" style="--d:220" aria-label="ساختمان: طبقهٔ بالا الگوها، طبقهٔ پایین اصول">
+      <div class="floor top"><span class="lbl">الگوها</span><span class="tag"><span class="pn fB">Strategy</span></span><span class="tag"><span class="pn fC">Factory</span></span><span class="tag"><span class="pn fS">Bridge</span></span><span class="tag"><span class="pn fB">Observer</span></span><span class="tag">…</span></div>
+      <div class="floor base"><span class="lbl">اصول</span><span class="tag" dir="ltr">S · O · L · I · D</span><span class="tag">به‌علاوهٔ ۴ اصل تکمیلی</span></div>
+    </div>
+    <p class="sub a" style="--d:320">در این درس هر اصل یک <b>تصویر</b>، یک جملهٔ قاعده، یک نمونهٔ «قبل ✗ / بعد ✓» و یک سؤال یادآوری دارد.</p>
+    <div class="flow a" style="--d:400">
+      <div class="fbox" style="--fbc:var(--ink)"><span class="num">تصویر</span><h3>با یک تصویر ساده به یادش بیاور</h3></div>
+      <div class="farr" aria-hidden="true">←</div>
+      <div class="fbox" style="--fbc:var(--ink)"><span class="num">قبل ✗ / بعد ✓</span><h3>ببین قانون‌شکنی چه چیزی را خراب می‌کند</h3></div>
+      <div class="farr" aria-hidden="true">←</div>
+      <div class="fbox" style="--fbc:var(--ink)"><span class="num">یادآوری</span><h3>از حافظه جوابش را بده</h3></div>
+    </div>
+  </section>
+
+  <section class="scene" data-title="S · تک‌مسئولیتی" data-principle="S" hidden></section>
+  <section class="scene" data-title="O · باز/بسته" data-principle="O" hidden></section>
+  <section class="scene" data-title="L · جایگزینی لیسکوف" data-principle="L" hidden></section>
+  <section class="scene" data-title="I · تفکیک رابط" data-principle="I" hidden></section>
+  <section class="scene" data-title="D · وارونگی وابستگی" data-principle="D" hidden></section>
+
+  <section class="scene" data-title="چهار اصل تکمیلی" hidden>
+    <div class="eyebrow a">صحنهٔ ۸ · چهار اصل تکمیلی</div>
+    <h2 class="a" style="--d:60">چهار عادت کوچک که SOLID را کامل می‌کنند.</h2>
+    <div class="xgrid">
+      <div class="xcard a" style="--d:150">
+        <h3><span class="img" aria-hidden="true">🚗</span>برنامه‌نویسی بر اساس رابط، نه پیاده‌سازی</h3>
+        <p><b>مصرف‌کننده به قرارداد پایدار وابسته باشد.</b> <span class="hint">(با هر ماشینی رانندگی می‌کنی چون فرمان و پدال یکسان‌اند.)</span></p>
+        <pre class="code"><span>pay: PaymentMethod      <i>// ✓ the contract</i></span><span>pay: CardPayment        <i>// ✗ one concrete class</i></span></pre>
+      </div>
+      <div class="xcard a" style="--d:230">
+        <h3><span class="img" aria-hidden="true">🧱</span>ترجیح ترکیب بر وراثت</h3>
+        <p><b>رفتارها را با همکاری اشیا ترکیب کنید، به‌جای ساختن سلسله‌مراتب عمیق.</b> <span class="hint">(لگو به‌جای شجره‌نامه.)</span></p>
+        <pre class="code"><span><i>// ✗</i> FlyingSwimmingTalkingDuck extends ...</span><span><i>// ✓</i> Duck(flyer, swimmer, voice)</span></pre>
+      </div>
+      <div class="xcard a" style="--d:310">
+        <h3><span class="img" aria-hidden="true">🗄️</span>کاهش coupling و افزایش cohesion</h3>
+        <p><b>وابستگی‌های غیرضروری را کم و مسئولیت‌های مرتبط را کنار هم نگه دارید.</b> <span class="hint">(کشوهای مرتب: چیزهای مرتبط داخل یک کشو، نخ کم بین کشوها.)</span></p>
+      </div>
+      <div class="xcard a" style="--d:390">
+        <h3><span class="img" aria-hidden="true">📰</span>اصل کمترین آگاهی <span class="en">Law of Demeter</span></h3>
+        <p><b>هر شیء فقط با همکاران نزدیک خود تعامل داشته باشد.</b> <span class="hint">(روزنامه‌فروش پول می‌خواهد؛ دستش را در کیف پول تو نمی‌کند.)</span></p>
+        <pre class="code"><span><i>// ✗</i> order.customer().wallet().take(50)</span><span><i>// ✓</i> order.charge(50)</span></pre>
+      </div>
+    </div>
+    <div class="check a" style="--d:480">
+      <p>کد <span class="en">a.b().c().d()</span> را دیدی. کدام اصل تکمیلی زیر سؤال است و چرا؟</p>
+      <details><summary>اول فکر کن، بعد بزن تا ببینی</summary><p>قانون دمتر (کمترین آگاهی). <span class="en">a</span> دارد با دوستِ دوستِ دوستش حرف می‌زند؛ اگر ساختار داخلی <span class="en">b</span> یا <span class="en">c</span> عوض شود، <span class="en">a</span> هم می‌شکند.</p></details>
+    </div>
+  </section>
+
+  <section class="scene" data-title="اصل ← الگو" hidden>
+    <div class="eyebrow a">صحنهٔ ۹ · ارتباط اصول با الگوها (از جزوه)</div>
+    <h2 class="a" style="--d:60">هر الگو به یک اصل تکیه دارد.</h2>
+    <p class="sub a" style="--d:120">برای هر الگو، اصلی را که بیشتر از همه به آن کمک می‌کند انتخاب کن.</p>
+    <div class="links" data-quickq="links"></div>
+  </section>
+
+  <section class="scene" data-title="خودت را بسنج" hidden>
+    <div class="eyebrow a">صحنهٔ ۱۰ · خودت را بسنج (سؤال‌ها درهم از درس ۱ و ۲)</div>
+    <div class="two">
+      <div class="quiz" data-quiz="2">
+        <h2 class="a" style="--d:60">اول به یاد بیاور، بعد مرور کن</h2>
+        <p class="sub a" style="--d:120">کارت خلاصه بعد از آخرین سؤال باز می‌شود.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="locked a" style="--d:200" data-locked="2">
+          <span>🏠 کارت خلاصهٔ درس ۲ تا پایان آزمون پنهان است.</span>
+          <button class="ghost" data-peek="2">با این حال نشانم بده</button>
+        </div>
+        <div class="flash" data-flash="2" hidden>
+          <div class="eyebrow">🏠 کارت درس ۲ · پنج قانون خانه</div>
+          <div class="ln"><b>👨‍🍳</b><span><b class="en">S</b> هر کلاس یک دلیل برای تغییر. آشپز حساب‌وکتاب نمی‌کند.</span></div>
+          <div class="ln"><b>⚡</b><span><b class="en">O</b> رفتار تازه = کلاس تازه، نه ویرایش کد قدیمی. چندراهی برق.</span></div>
+          <div class="ln"><b>🐧</b><span><b class="en">L</b> فرزند باید قول‌های والد را نگه دارد. پنگوئن پرواز نمی‌کند.</span></div>
+          <div class="ln"><b>🎛️</b><span><b class="en">I</b> رابط‌های کوچک. کنترل ۸۰ دکمه‌ای نه.</span></div>
+          <div class="ln"><b>💡</b><span><b class="en">D</b> به انتزاع وابسته شو و وابستگی را تزریق کن. لامپ به پریز وصل است، نه نیروگاه.</span></div>
+          <div class="ln"><b>+</b><span>🚗 رابط · 🧱 ترکیب · 🗄️ coupling کم / cohesion زیاد · 📰 قانون دمتر</span></div>
+        </div>
+        <div class="plan a" style="--d:300">
+          <span class="eyebrow">برنامهٔ مرور فاصله‌دار</span>
+          <p style="font-size:14px">در این روزها فقط همین آزمون را با کارت پنهان دوباره بده.</p>
+          <ol data-plan="2"></ol>
+          <p class="hint">درس ۳ با دو سؤال از درس ۱ و ۲ شروع می‌شود.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  </div>
+
+  <div class="nav">
+    <button class="btn" id="prev">→ قبلی</button>
+    <span class="hint" id="where"></span>
+    <span style="display:flex;gap:12px;align-items:center"><button class="ghost" id="replay">پخش دوباره</button><button class="btn primary" id="next">بعدی ←</button></span>
+  </div>
+</main>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const fa = n => Number(n).toLocaleString('fa-IR');
+
+  /* Wrap every run of Latin text inside Persian text in <bdi dir="ltr">, so e.g. "SOLID+",
+     "if/elif" or "a.b().c()" keep their own left-to-right order inside a right-to-left sentence. */
+  const LAT = /[A-Za-z][A-Za-z0-9_.+\/\-()'"<>*]*(?:[ ]+[A-Za-z0-9_.+\/\-()'"<>*]*[A-Za-z0-9_+)'"])*/g;
+  const SKIP = 'PRE,CODE,SCRIPT,STYLE,BDI,.en,.cart,.out,.letter,[dir="ltr"]';
+  function isolateLatin(root) {
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => (/[A-Za-z]/.test(n.nodeValue) && !n.parentElement.closest(SKIP)) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
+    });
+    const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node => {
+      const text = node.nodeValue, frag = document.createDocumentFragment();
+      let last = 0;
+      text.replace(LAT, (m, i) => {
+        if (i > last) frag.appendChild(document.createTextNode(text.slice(last, i)));
+        // keep sentence punctuation (a final "." or an unmatched ")") with the Persian text around it
+        let t = m;
+        while (/[.,'"]$/.test(t) || (t.endsWith(')') && !t.includes('('))) t = t.slice(0, -1);
+        const b = document.createElement('bdi'); b.className = 'lat'; b.dir = 'ltr'; b.textContent = t;
+        frag.appendChild(b); last = i + t.length; return m;
+      });
+      if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+      node.replaceWith(frag);
+    });
+  }
+
+  /* ---------- دکمه‌های جواب: درست/غلط بدون رنگ ---------- */
+  function wireOpts(box, onAnswer) {
+    const opts = [...box.querySelectorAll('.opt')];
+    opts.forEach(b => b.addEventListener('click', () => {
+      opts.forEach(x => { x.disabled = true; if (x.dataset.ok === '1') x.classList.add('right'); });
+      const ok = b.dataset.ok === '1';
+      if (!ok) b.classList.add('wrong');
+      box.querySelectorAll('.why').forEach(w => w.hidden = false);
+      onAnswer && onAnswer(ok);
+    }));
+  }
+  function qBox(item, num, delay) {
+    const box = document.createElement('div');
+    box.className = 'q a'; box.style.setProperty('--d', delay);
+    box.innerHTML = '<p>' + (num ? fa(num) + '. ' : '') + item.q + '</p><div class="opts">' +
+      item.o.map((t, k) => '<button class="opt" data-ok="' + (k === item.a ? 1 : 0) + '">' + t + '</button>').join('') +
+      '</div><p class="why" hidden>' + item.w + '</p>';
+    return box;
+  }
+  $$('.lessonview[data-lesson="1"] .scene:first-child .q').forEach(q => wireOpts(q));
+
+  /* ---------- درس ۱: کارت چهاربخشی ---------- */
+  const parts = [
+    { c:'--n', t:'نام', what:'واژه‌ای مشترک برای اشاره سریع به یک راه‌حل و ایجاد زبان مشترک میان اعضای تیم.', recipe:'اسم غذا. بگویی «قورمه‌سبزی» و همه همان را تصور می‌کنند.', ex:'«Strategy»' },
+    { c:'--p', t:'زمینه و مسئله', what:'شرایطی که مسئله در آن رخ می‌دهد؛ مثلاً چند الگوریتم قابل‌تعویض یا چند خانواده محصول مرتبط.', recipe:'«برای ۸ نفر، آماده در ۳۰ دقیقه»: می‌گوید کِی این دستور به کار می‌آید.', ex:'صندوق باید بین کارت، کیف پول و درگاه بانکی انتخاب کند و روش‌های تازه مدام می‌آیند.' },
+    { c:'--s', t:'راه‌حل', what:'سازمان‌دهی نقش‌ها، مسئولیت‌ها و همکاری میان کلاس‌ها یا اشیا.', recipe:'مراحل و نقش هر ماده. برندش را خودت انتخاب می‌کنی.', ex:'هر روش پرداخت کلاس خودش را دارد و پشت یک رابط مشترک است. صندوق فقط با رابط حرف می‌زند.' },
+    { c:'--c', t:'پیامدها', what:'مزایا، هزینه‌ها، محدودیت‌ها و اثر الگو بر توسعه‌پذیری، کارایی و پیچیدگی.', recipe:'برچسب ارزش غذایی: کالری و حساسیت‌زاها هم نوشته شده.', ex:'سود: روش تازه فقط یک کلاس تازه است. هزینه: کلاس‌های بیشتر، و چیزی باید روش را انتخاب کند.' }
+  ];
+  const detail = $('#detail'), bands = $$('.band'), recipe = $('#recipe');
+  function setPart(i) {
+    const p = parts[i];
+    bands.forEach((b, k) => b.setAttribute('aria-pressed', k === i ? 'true' : 'false'));
+    detail.style.setProperty('--dc', 'var(' + p.c + ')');
+    detail.innerHTML = '<h3>' + p.t + '</h3>' +
+      '<div class="row"><span class="lab">چیست</span><span>' + p.what + '</span></div>' +
+      '<div class="row"><span class="lab">روی کارت دستور پخت</span><span>' + p.recipe + '</span></div>' +
+      '<div class="row"><span class="lab">مثال Strategy</span><span>' + p.ex + '</span></div>';
+    detail.hidden = recipe.classList.contains('testing') && !bands[i].classList.contains('shown');
+    isolateLatin(detail);
+  }
+  bands.forEach((b, k) => b.addEventListener('click', () => { b.classList.add('shown'); setPart(k); }));
+  $('#testme').addEventListener('click', () => {
+    const on = !recipe.classList.contains('testing');
+    recipe.classList.toggle('testing', on);
+    bands.forEach(b => b.classList.remove('shown'));
+    $('#testme').textContent = on ? 'همهٔ واژه‌ها را نشان بده' : 'واژه‌ها را پنهان کن و از من بپرس';
+    detail.hidden = on;
+    if (!on) setPart(0);
+  });
+  setPart(0);
+
+  /* ---------- درس ۱: دسته‌بندی ---------- */
+  const items = [
+    ['Quicksort', 0, 'الگو نیست. الگوریتم است: گام‌های محاسبه.'],
+    ['Observer', 1, 'الگوست. وقتی چیزی تغییر کند به بقیه خبر می‌دهد (درس ۹).'],
+    ['یک کتابخانهٔ نمودار که نصب می‌کنی', 0, 'الگو نیست. کتابخانه است: کدی که فراخوانی می‌کنی.'],
+    ['Strategy', 1, 'الگوست. در صحنهٔ ۲ دیدی‌اش.'],
+    ['معماری لایه‌ای برای کل برنامه', 0, 'جزو ۲۳ الگوی GoF نیست. کل سیستم را شکل می‌دهد (درس ۱۳).'],
+    ['«همیشه برای تنظیمات از Singleton استفاده کن»', 0, 'الگو نیست. یک قانون است، و الگوها گزینه‌اند.']
+  ];
+  const sort = $('#sort1');
+  items.forEach(([txt, isPat, fb]) => {
+    const row = document.createElement('div');
+    row.className = 'srow';
+    row.innerHTML = '<span class="it">' + esc(txt) + '</span><span class="opts row">' +
+      '<button class="opt" data-ok="' + (isPat ? 1 : 0) + '">الگو</button>' +
+      '<button class="opt" data-ok="' + (isPat ? 0 : 1) + '">الگو نیست</button></span>' +
+      '<span class="fb why" hidden>' + esc(fb) + '</span>';
+    sort.appendChild(row);
+    wireOpts(row);
+  });
+
+  /* ---------- درس ۱: نمایش زندهٔ Strategy ---------- */
+  const methods = [
+    { id:'card', ic:'💳', name:'CardPayment', label:'کارت', does:'charge the bank card', out:'charged card ****4821' },
+    { id:'wallet', ic:'👛', name:'WalletPayment', label:'کیف پول', does:'take it from the wallet', out:'wallet balance -120,000 T' },
+    { id:'bank', ic:'🏦', name:'BankGateway', label:'درگاه بانکی', does:'send the user to the bank page', out:'redirected to the bank gateway' }
+  ];
+  const extra = { id:'gift', ic:'🎁', name:'GiftCardPayment', label:'کارت هدیه', does:'use the gift card credit', out:'gift card GC-77 used' };
+  let active = 'card', added = false;
+  const slot = $('#slot'), picks = $('#picks'), out = $('#out'), code = $('#code');
+  const fmt = t => esc(t).replace(/\b(interface|class|implements|extends)\b/g, '<b>$1</b>').replace(/(\/\/.*)$/, '<i>$1</i>');
+  function renderCode(justAdded) {
+    const L = [['', 'interface PaymentMethod:'], ['', '    pay(amount)'], ['', ' ']];
+    methods.forEach(m => {
+      L.push([m.id, 'class ' + m.name + ' implements PaymentMethod:', justAdded && m.id === 'gift']);
+      L.push([m.id, '    pay(amount): ' + m.does, justAdded && m.id === 'gift']);
+      L.push(['', ' ']);
+    });
+    L.push(['', 'class Checkout:                    // never edited']);
+    L.push(['', '    method: PaymentMethod          // the slot']);
+    L.push(['', '    finish(order):']);
+    L.push(['', '        method.pay(order.total)']);
+    code.innerHTML = L.map(([id, t, isNew]) => '<span class="' + (id && id === active ? 'on' : '') + (isNew ? ' added' : '') + '">' + fmt(t) + '</span>').join('');
+  }
+  function renderPicks() {
+    picks.innerHTML = '';
+    methods.forEach(m => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'pick'; b.textContent = m.ic + ' ' + m.label;
+      b.setAttribute('aria-pressed', m.id === active ? 'true' : 'false');
+      b.addEventListener('click', () => choose(m.id));
+      picks.appendChild(b);
+    });
+    if (!added) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'pick new'; b.textContent = '+ یک روش تازه اضافه کن';
+      b.addEventListener('click', () => { added = true; methods.push(extra); choose('gift', true); });
+      picks.appendChild(b);
+    }
+  }
+  function choose(id, justAdded) {
+    active = id;
+    const m = methods.find(x => x.id === id);
+    slot.innerHTML = '<div class="cart"><span class="ic" aria-hidden="true">' + m.ic + '</span><span>' + esc(m.name) + '<small>implements PaymentMethod</small></span></div>';
+    out.textContent = 'checkout.finish(order) -> pay(120,000 T) -> ' + m.out;
+    renderPicks(); renderCode(!!justAdded);
+    $('#unchanged').textContent = justAdded ? 'کلاس تازه اضافه شد · صندوق: ۰ خط تغییر' : 'کد صندوق: ۰ خط تغییر';
+  }
+  choose('card');
+
+  /* ---------- درس ۲: صحنه‌های پنج اصل ---------- */
+  const P = {
+    S: { n:3, en:'Single Responsibility Principle', fa:'اصل تک‌مسئولیتی', img:'👨‍🍳', anchor:'آشپز حساب‌وکتاب نمی‌کند', anchorSub:'هر نفر در آشپزخانه یک کار اصلی دارد.',
+      rule:'هر ماژول یک مسئولیت محوری و <span class="key">یک دلیل اصلی برای تغییر</span> داشته باشد.',
+      bad:['class Report:','    calculate()      // tax rules change?','    toPdf()          // PDF design changes?','    emailTo(boss)    // mail server changes?'],
+      badWhy:'سه دلیل برای تغییر در یک کلاس. عوض‌کردن ظاهر PDF ممکن است محاسبه را خراب کند.',
+      good:['class ReportCalculator:  calculate()','class PdfFormatter:      format(report)','class ReportMailer:      send(file, to)'],
+      effect:'پیامد عملی: کاهش تغییرات ناخواسته و کلاس‌های چندمنظوره.',
+      check:'کلاس <span class="en">User</span> هم رمز عبور را بررسی می‌کند و هم ایمیل خوش‌آمد می‌فرستد. چند دلیل برای تغییر دارد؟',
+      ans:'دو دلیل: قوانین امنیتی رمز، و متن یا سرویس ایمیل. پس دو مسئولیت دارد و بهتر است جدا شود.' },
+    O: { n:4, en:'Open/Closed Principle', fa:'اصل باز/بسته', img:'⚡', anchor:'چندراهی برق', anchorSub:'وسیلهٔ تازه را وصل می‌کنی؛ سیم‌کشی دیوار را باز نمی‌کنی.',
+      rule:'اجزا برای <span class="key">توسعه باز</span> و برای <span class="key">تغییر مستقیم کد پایدار بسته</span> باشند.',
+      bad:['function shippingCost(order, type):','    if type == "standard": ...','    elif type == "express": ...','    elif type == "sameDay": ...  // edit again','                                  // every new type'],
+      badWhy:'هر نوع ارسال تازه یعنی باز کردن و ویرایش تابعی که الان درست کار می‌کند.',
+      good:['interface ShippingStrategy: cost(order)','class SameDayShipping implements ShippingStrategy','    cost(order): ...            // just add a class','checkout.shipping(o) = strategy.cost(o)  // untouched'],
+      effect:'پیامد عملی: افزودن رفتار جدید با افزودن پیاده‌سازی تازه.',
+      check:'در درس ۱ کدام الگو همین اصل را نشان داد، و نشانه‌اش چه بود؟',
+      ans:'<span class="pn fB">Strategy</span>. نشانه: با اضافه شدن کارت هدیه، صندوق «۰ خط تغییر» داشت.' },
+    L: { n:5, en:'Liskov Substitution Principle', fa:'اصل جایگزینی لیسکوف', img:'🐧', anchor:'پنگوئن پرنده است، ولی پرواز نمی‌کند', anchorSub:'اگر «پرنده» قول پرواز بدهد، پنگوئن قول را می‌شکند.',
+      rule:'زیرنوع باید بتواند <span class="key">بدون شکستن انتظارهای نوع پایه</span> جایگزین آن شود.',
+      bad:['class Bird:','    fly()','class Penguin extends Bird:','    fly(): throw "I can\'t fly!"','for b in birds: b.fly()     // crashes on Penguin'],
+      badWhy:'کدی که با «هر پرنده‌ای» کار می‌کرد، با یک زیرکلاس از کار می‌افتد.',
+      good:['class Bird:            eat()','interface Flying:      fly()','class Sparrow extends Bird implements Flying','class Penguin extends Bird     // no fly() promised','for f in flyingBirds: f.fly()  // always safe'],
+      effect:'پیامد عملی: قراردادها و رفتارهای سازگار.',
+      check:'زیرکلاسی متد والد را با «پشتیبانی نمی‌شود» پر کرده است. کدام اصل شکسته شده؟',
+      ans:'جایگزینی لیسکوف (L). فرزند قولی را که والد داده نگه نداشته. (اگر کلاس مجبور به پیاده‌سازی متدی شده که نمی‌خواهد، معمولاً I هم مشکل دارد.)' },
+    I: { n:6, en:'Interface Segregation Principle', fa:'اصل تفکیک رابط', img:'🎛️', anchor:'کنترل تلویزیون با ۸۰ دکمه', anchorSub:'وقتی فقط صدا و کانال لازم داری.',
+      rule:'<span class="key">رابط‌های کوچک و هدفمند</span> بهتر از رابط‌های حجیم هستند.',
+      bad:['interface Machine: print() scan() fax() staple()','class SimplePrinter implements Machine:','    print(): ...','    scan():   not supported','    fax():    not supported','    staple(): not supported'],
+      badWhy:'چاپگر ساده مجبور است وانمود کند سه کار دیگر را هم بلد است.',
+      good:['interface Printer: print()','interface Scanner: scan()','interface Fax:     fax()','class SimplePrinter implements Printer','class OfficeMachine implements Printer, Scanner, Fax'],
+      effect:'پیامد عملی: وابستگی هر کلاینت فقط به عملیات مورد نیاز.',
+      check:'چه نشانه‌ای در کد می‌گوید یک رابط بیش از حد بزرگ است؟',
+      ans:'کلاس‌هایی که چند متد را خالی یا با «پشتیبانی نمی‌شود» پر می‌کنند، یا کلاینت‌هایی که فقط یکی دو متد از رابطی بزرگ را صدا می‌زنند.' },
+    D: { n:7, en:'Dependency Inversion Principle', fa:'اصل وارونگی وابستگی', img:'💡', anchor:'لامپ به پریز وصل است، نه به نیروگاه', anchorSub:'نیروگاه عوض شود، لامپ نمی‌فهمد.',
+      rule:'ماژول‌های سطح بالا <span class="key">به انتزاع وابسته</span> شوند، نه جزئیات سطح پایین.',
+      bad:['class OrderService:','    bank = new LegacyBankApi()   // hard-wired','    place(order):','        bank.submit(order.total, "IRR")'],
+      badWhy:'برای تست باید واقعاً به بانک وصل شوی، و عوض‌کردن بانک یعنی ویرایش OrderService.',
+      good:['interface PaymentGateway: pay(money)','class OrderService:','    constructor(gateway: PaymentGateway)  // injected','// app:   OrderService(BankAdapter(LegacyBankApi()))','// tests: OrderService(FakeGateway())'],
+      effect:'پیامد عملی: تزریق وابستگی و کاهش coupling.',
+      check:'چرا تست OrderService در نسخهٔ دوم ساده‌تر است؟',
+      ans:'چون می‌توانی به‌جای بانک واقعی یک <span class="en">FakeGateway</span> بدهی. OrderService فقط رابط را می‌شناسد، نه بانک را.' }
+  };
+  $$('[data-principle]').forEach(sec => {
+    const p = P[sec.dataset.principle];
+    const pre = (lines) => '<pre class="code">' + lines.map(l => '<span>' + fmt(l) + '</span>').join('') + '</pre>';
+    sec.innerHTML =
+      '<div class="eyebrow a">صحنهٔ ' + fa(p.n) + ' · <span class="en">' + p.en + '</span></div>' +
+      '<div class="prinhead a" style="--d:60"><span class="letter" aria-hidden="true">' + sec.dataset.principle + '</span><span class="t"><h2>' + p.fa + '</h2>' +
+      '<span class="anchor"><span class="img" aria-hidden="true">' + p.img + '</span><span>' + p.anchor + '<small>' + p.anchorSub + '</small></span></span></span></div>' +
+      '<p class="rule a" style="--d:160">' + p.rule + '</p>' +
+      '<div class="ba"><div class="bad a" style="--d:260"><h3>قبل</h3>' + pre(p.bad) + '<p class="effect">' + p.badWhy + '</p></div>' +
+      '<div class="good a" style="--d:400"><h3>بعد</h3>' + pre(p.good) + '<p class="effect">' + p.effect + '</p></div></div>' +
+      '<div class="check a" style="--d:520"><p>' + p.check + '</p><details><summary>اول فکر کن، بعد بزن تا ببینی</summary><p>' + p.ans + '</p></details></div>';
+  });
+
+  /* ---------- درس ۲: گرم‌کردن و اتصال الگو ← اصل ---------- */
+  const N = '<b class="N">ن</b>', Pm = '<b class="P">م</b>', Sr = '<b class="S">ر</b>', Cp = '<b class="C">پ</b>';
+  const warm = [
+    { q:'<span class="hint">از درس ۱:</span> کدام بخش کارت الگو هزینه‌ها و محدودیت‌ها را می‌گوید؟', o:[N+' نام', Pm+' مسئله', Sr+' راه‌حل', Cp+' پیامدها'], a:3, w:'پیامدها: چه می‌گیری و چه می‌پردازی.' },
+    { q:'<span class="hint">از درس ۱:</span> تفاوت الگو و الگوریتم چیست؟', o:['هیچ؛ یکی‌اند','الگو همکاری اجزا را توصیف می‌کند؛ الگوریتم گام‌های محاسبه را','الگوریتم از الگو بزرگ‌تر است'], a:1, w:'سطح‌ها: الگوریتم (داخل متد) ← الگو (چند کلاس) ← معماری (کل سیستم).' },
+    { q:'<span class="hint">حدس دربارهٔ درس ۲:</span> کلاسی که گزارش را محاسبه می‌کند، PDF می‌سازد و ایمیل می‌زند، چه مشکلی دارد؟', o:['خیلی کند اجرا می‌شود','چند دلیل جدا برای تغییر دارد','هیچ مشکلی ندارد'], a:1, w:'جواب در صحنهٔ ۳ (اصل S) است.' }
+  ];
+  const warmBox = $('[data-quickq="warm"]');
+  warm.forEach((it, k) => { const b = qBox(it, 0, 200 + k * 80); warmBox.appendChild(b); wireOpts(b); });
+  warmBox.style.cssText = 'display:flex;flex-direction:column;gap:12px';
+
+  const links = [
+    { q:'<span class="pn fB">Strategy</span> و <span class="pn fS">Bridge</span>', o:['باز/بسته و ترکیب به‌جای وراثت','تک‌مسئولیتی','جایگزینی لیسکوف'], a:0, w:'جزوه: Strategy و Bridge به توسعه‌پذیری و ترکیب کمک می‌کنند.' },
+    { q:'الگوهای <span class="pn fC">Factory</span>', o:['تفکیک رابط','کاهش وابستگی به کلاس‌های مشخص (وارونگی وابستگی)','قانون دمتر'], a:1, w:'جزوه: Factoryها وابستگی به کلاس‌های مشخص را کاهش می‌دهند؛ مصرف‌کننده فقط نوع انتزاعی را می‌شناسد.' },
+    { q:'<span class="pn fB">Observer</span>', o:['coupling کم: ارتباط ناشر و مشترک را سست می‌کند','تک‌مسئولیتی','جایگزینی لیسکوف'], a:0, w:'جزوه: Observer ارتباط ناشر و مشترک را سست می‌کند؛ ناشر لازم نیست جزئیات مشترک‌ها را بداند.' }
+  ];
+  const linkBox = $('[data-quickq="links"]');
+  links.forEach((it, k) => { const b = qBox(it, 0, 200 + k * 80); linkBox.appendChild(b); wireOpts(b); });
+
+  /* ================= درس‌های ۳ تا ۱۶: داده + موتور ساخت صحنه ================= */
+  const EXTRA_QUIZ = {};
+  const FAM = { create:['ایجادگرا','fC'], struct:['ساختاری','fS'], behave:['رفتاری','fB'] };
+
+  /* هر الگو: کارت چهاربخشی ن·م·ر·پ با همان رنگ‌های درس ۱ */
+  const PAT = {
+    'Singleton': { fam:'create', fa:'تک‌نمونه', img:'👑', tag:'تنها پادشاه', tagSub:'در هر کشور (محدوده) فقط یک پادشاه.',
+      def:'هدف: تضمین وجود یک نمونه از یک کلاس در محدوده‌ای مشخص و فراهم‌کردن نقطه دسترسی مشترک. نمونه‌های قابل تصور شامل رجیستری سراسری یا پیکربندی مشترک هستند؛ اما در سامانه‌های مدرن، دامنه Singleton باید دقیق تعریف شود: یک نمونه در هر process، هر container یا هر application context؟',
+      P:'باید در یک محدودهٔ مشخص <span class="key">فقط یک نمونه</span> از کلاس وجود داشته باشد و همه از یک نقطهٔ مشترک به آن برسند؛ مثل رجیستری سراسری یا پیکربندی مشترک.',
+      S:'سازنده خصوصی می‌شود و کلاس خودش تنها نمونه را می‌سازد و از یک متد ایستا برمی‌گرداند. اول دقیق بگو «یک نمونه در هر چه؟» در هر process، هر container یا هر application context؟',
+      roles:['Singleton','getInstance()'],
+      code:['class AppConfig:','    private static INSTANCE = new AppConfig()','    private constructor()','    static getInstance(): return INSTANCE'],
+      plus:['کنترل ساخت و دسترسی مشترک'], minus:['ایجاد state سراسری','پنهان‌شدن وابستگی‌ها','دشوارشدن آزمون موازی','پیچیدگی در محیط چندنخی یا چندفرایندی'],
+      note:'در بسیاری از پروژه‌ها، تزریق وابستگی با scope مشخص از Singleton دستی بهتر است.',
+      check:{ q:'چرا Singleton تست را سخت می‌کند؟', a:'چون هر کلاسی پنهانی از همان شیء سراسری استفاده می‌کند. نمی‌توانی در تست به‌جایش یک نسخهٔ جعلی بدهی، و state یک تست به تست بعدی نشت می‌کند.' } },
+    'Factory Method': { fam:'create', fa:'متد کارخانه', img:'🏭', tag:'هر شعبه محصول خودش را می‌سازد', tagSub:'دفتر مرکزی روند را تعیین می‌کند؛ شعبه تصمیم می‌گیرد چه بسازد.',
+      def:'هدف: تعریف یک نقطه توسعه برای ساخت محصول، به‌طوری‌که زیرکلاس یا پیاده‌سازی مشخص تصمیم بگیرد کدام محصول ایجاد شود. مصرف‌کننده به نوع انتزاعی محصول وابسته می‌ماند و لازم نیست جزئیات new را بداند.',
+      P:'مناسب است وقتی… نوع محصول در زیرکلاس یا پیکربندی تعیین می‌شود. می‌خواهید منطق مصرف‌کننده از کلاس concrete جدا بماند.',
+      S:'یک <span class="key">نقطهٔ توسعه برای ساخت</span> تعریف کن: متدی انتزاعی که محصول برمی‌گرداند. زیرکلاس‌ها تصمیم می‌گیرند کدام محصول ساخته شود. مصرف‌کننده فقط نوع انتزاعی محصول را می‌شناسد و جزئیات new را نمی‌داند.',
+      roles:['Creator','ConcreteCreator','Product','ConcreteProduct'],
+      code:['interface Document: open()','class PdfDocument implements Document: open()','','abstract class Creator:','    abstract createDocument(): Document','    process(): createDocument().open()','','class PdfCreator extends Creator:','    createDocument(): return new PdfDocument()'],
+      plus:['مصرف‌کننده از کلاس concrete جدا می‌ماند','افزودن محصول تازه با زیرکلاس تازه'], minus:['برای یک ساخت ساده و ثابت، Factory Method ممکن است پیچیدگی غیرضروری بسازد.','تعداد زیاد Creatorها می‌تواند ساختار را سنگین کند.'],
+      check:{ q:'در کد بالا، کلاس Creator کجا اسم PdfDocument را می‌برد؟', a:'هیچ‌جا. فقط PdfCreator آن را می‌شناسد. Creator فقط با نوع انتزاعی Document کار می‌کند.' } },
+    'Abstract Factory': { fam:'create', fa:'کارخانهٔ انتزاعی', img:'🎨', tag:'کیت هماهنگ تم', tagSub:'تم تیره را انتخاب کنی، دکمه و پنجره هر دو تیره می‌آیند.',
+      def:'هدف: فراهم‌کردن رابطی برای ساخت خانواده‌ای از محصولات مرتبط، بدون وابسته‌کردن کلاینت به کلاس‌های concrete. برای مثال، رابط کاربری با تم روشن و تیره ممکن است Button و Dialog هماهنگ تولید کند. انتخاب یک کارخانه، خانواده سازگار محصولات را تعیین می‌کند.',
+      P:'باید <span class="key">خانواده‌ای از محصولات مرتبط</span> را با هم بسازی و قاطی نشوند؛ مثلاً Button و Dialog هماهنگ برای تم روشن و تیره.',
+      S:'رابطی بساز که برای هر محصول خانواده یک متد ساخت دارد. هر کارخانهٔ concrete یک خانوادهٔ سازگار می‌سازد. انتخاب یک کارخانه، خانوادهٔ محصولات را تعیین می‌کند.',
+      roles:['AbstractFactory','ConcreteFactory','AbstractProduct','ConcreteProduct'],
+      code:['interface UIFactory: button(): Button   dialog(): Dialog','class LightFactory implements UIFactory:','    button(): return new LightButton()','    dialog(): return new LightDialog()','class DarkFactory implements UIFactory: ...','','ui = settings.dark ? DarkFactory() : LightFactory()'],
+      plus:['محصولات یک خانواده همیشه سازگارند','کلاینت به کلاس‌های concrete وابسته نیست'], minus:['افزودن یک نوع محصول تازه یعنی تغییر همهٔ کارخانه‌ها'],
+      note:'تمایز با Factory Method: Factory Method معمولاً نقطه ساخت یک محصول را توسعه‌پذیر می‌کند؛ Abstract Factory خانواده‌ای از محصولات مرتبط را یکجا مدیریت می‌کند.',
+      check:{ q:'تفاوت اصلی Abstract Factory با Factory Method چیست؟', a:'Factory Method ساخت یک محصول را توسعه‌پذیر می‌کند؛ Abstract Factory یک خانوادهٔ کامل و هماهنگ از محصولات را با هم می‌سازد.' } },
+    'Builder': { fam:'create', fa:'سازندهٔ مرحله‌ای', img:'🥪', tag:'ساندویچ مرحله‌به‌مرحله', tagSub:'نان، بعد پنیر، بعد سس… و در آخر «تحویل بده».',
+      def:'هدف: جداسازی ساخت تدریجی یک شیء پیچیده از نمایش نهایی آن. در ساخت گزارش، درخواست HTTP یا شیء پیکربندی با گزینه‌های متعدد، Builder خوانایی فراخوانی را افزایش می‌دهد و از سازنده‌های طولانی با پارامترهای مبهم جلوگیری می‌کند.',
+      P:'ساخت یک شیء پیچیده گزینه‌های زیادی دارد؛ سازنده‌ای با پارامترهای طولانی و مبهم مثل <span class="en">new Report("X", true, false, null, PDF, 3)</span> خوانا نیست.',
+      S:'<span class="key">ساخت تدریجی</span> را از نمایش نهایی جدا کن: یک شیء Builder گام‌به‌گام تنظیم می‌شود و در پایان build() شیء کامل را می‌دهد. برای گزارش، درخواست HTTP یا شیء پیکربندی پرگزینه.',
+      roles:['Builder','build()','Product'],
+      code:['report = Report.builder()','    .title("Monthly Usage")','    .includeCharts(true)','    .format(PDF)','    .build()'],
+      plus:['فراخوانی خوانا','جلوگیری از سازنده‌های طولانی با پارامترهای مبهم'], minus:['یک کلاس اضافه برای هر محصول پیچیده'],
+      check:{ q:'چه نشانه‌ای در کد می‌گوید Builder لازم است؟', a:'سازنده‌ای با پارامترهای زیاد، به‌خصوص چند true/false یا null پشت سر هم که از روی فراخوانی نمی‌فهمی کدام چیست.' } },
+    'Prototype': { fam:'create', fa:'نمونهٔ اولیه', img:'🐑', tag:'گوسفند شبیه‌سازی‌شده', tagSub:'به‌جای ساختن از صفر، از نمونهٔ موجود کپی بگیر.',
+      def:'هدف: ایجاد شیء جدید از طریق کپی‌کردن یک نمونه موجود، به‌ویژه وقتی ساخت مستقیم پرهزینه یا وابسته به پیکربندی پیچیده است. باید روشن شود کپی shallow است یا deep؛ در کپی سطحی، ارجاع به اجزای mutable ممکن است میان نسخه‌ها مشترک بماند.',
+      P:'ساخت مستقیم شیء <span class="key">پرهزینه</span> است یا به پیکربندی پیچیده وابسته است، و یک نمونهٔ آماده داری.',
+      S:'شیء جدید را با <span class="key">کپی‌کردن</span> یک نمونهٔ موجود بساز. باید روشن باشد کپی <b>سطحی (shallow)</b> است یا <b>عمیق (deep)</b>: در کپی سطحی، ارجاع به اجزای mutable ممکن است بین نسخه‌ها مشترک بماند.',
+      roles:['Prototype','clone()'],
+      code:['template = loadHeavyReportTemplate()   // slow, once','monthly = template.clone()','monthly.title = "November"'],
+      plus:['ساخت سریع از نمونهٔ آماده','پنهان ماندن پیکربندی پیچیده'], minus:['خطای کپی سطحی: تغییر یکی، دیگری را هم عوض می‌کند'],
+      check:{ q:'در کپی سطحی چه خطری هست؟', a:'اجزای تغییرپذیر (مثل یک لیست) بین اصل و کپی مشترک می‌مانند؛ تغییر در یکی در دیگری هم دیده می‌شود.' } },
+    'Adapter': { fam:'struct', fa:'مبدل رابط', img:'🔌', tag:'تبدیل دوشاخه', tagSub:'شارژر تو سه‌شاخه است، پریز دوشاخه؛ تبدیل وسطشان می‌نشیند.',
+      def:'هدف: تبدیل رابط یک کلاس به رابطی که کلاینت انتظار دارد. نمونه متداول، اتصال سامانه به درگاه پرداخت یا سرویس قدیمی است که API متفاوتی دارد. Adapter مرز تبدیل را متمرکز می‌کند تا منطق اصلی به قرارداد خارجی گره نخورد.',
+      P:'سامانه یک رابط انتظار دارد، ولی درگاه پرداخت یا سرویس قدیمی <span class="key">API متفاوتی</span> دارد.',
+      S:'کلاسی بساز که رابط مورد انتظار را پیاده‌سازی کند و در داخل، فراخوانی را به API قدیمی ترجمه کند. Adapter <span class="key">مرز تبدیل</span> را متمرکز می‌کند تا منطق اصلی به قرارداد خارجی گره نخورد.',
+      roles:['Target','Adapter','Adaptee','Client'],
+      code:['interface PaymentGateway: pay(amount: Money)','class LegacyBankApi: submit(value: double, ccy: String)','','class BankAdapter implements PaymentGateway:','    api: LegacyBankApi','    pay(m): api.submit(m.value(), m.currency())'],
+      plus:['منطق اصلی از API خارجی جدا می‌ماند','عوض‌کردن سرویس خارجی فقط Adapter را تغییر می‌دهد'], minus:['یک لایهٔ اضافه که باید تست شود'],
+      note:'گونه‌ها: Object Adapter با ترکیب و delegation کار می‌کند؛ Class Adapter از وراثت استفاده می‌کند و به محدودیت‌های زبان وابسته است. ترکیب معمولاً انعطاف بیشتری دارد.',
+      check:{ q:'اگر بانک API خود را عوض کند، در طراحی با Adapter کجا باید تغییر کند؟', a:'فقط داخل BankAdapter. بقیهٔ سامانه با PaymentGateway کار می‌کند و چیزی نمی‌فهمد.' } },
+    'Facade': { fam:'struct', fa:'نما', img:'🛎️', tag:'پذیرش هتل', tagSub:'یک تماس با پذیرش؛ او خودش با خانه‌داری، رستوران و تاکسی هماهنگ می‌کند.',
+      def:'هدف: ارائه یک رابط ساده و سطح‌بالا به مجموعه‌ای از اجزای زیرسیستم. مثلاً متد placeOrder می‌تواند اعتبارسنجی سبد، رزرو موجودی، محاسبه مالیات، پرداخت و ثبت سفارش را هماهنگ کند. Facade پیچیدگی داخلی را حذف نمی‌کند؛ دسترسی به آن را ساده می‌کند.',
+      P:'برای یک کار ساده باید با <span class="key">چند جزء زیرسیستم</span> حرف بزنی و ترتیب درستشان را بدانی.',
+      S:'یک رابط ساده و سطح‌بالا بساز؛ مثلاً متد placeOrder که اعتبارسنجی سبد، رزرو موجودی، محاسبهٔ مالیات، پرداخت و ثبت سفارش را هماهنگ می‌کند. Facade پیچیدگی را <b>حذف نمی‌کند</b>؛ دسترسی به آن را ساده می‌کند.',
+      roles:['Facade','Subsystem classes','Client'],
+      code:['class OrderFacade:','    placeOrder(cart):','        cartValidator.check(cart)','        inventory.reserve(cart.items)','        tax = taxCalculator.compute(cart)','        payment.pay(cart.total + tax)','        orders.save(cart)'],
+      plus:['کلاینت ساده می‌ماند','زیرسیستم پشت یک در قرار می‌گیرد'], minus:['خطر تبدیل‌شدن به «کلاس همه‌کاره»'],
+      note:'خطای رایج: Facade را به «کلاس همه‌کاره» تبدیل نکنید. اگر منطق کسب‌وکار و تصمیم‌های پیچیده به آن منتقل شد، مرز مسئولیت‌ها را بازبینی کنید.',
+      check:{ q:'Facade پیچیدگی زیرسیستم را حذف می‌کند؟', a:'نه. پیچیدگی سر جایش است؛ Facade فقط یک در ساده برای دسترسی به آن می‌سازد.' } },
+    'Decorator': { fam:'struct', fa:'تزئین‌کننده', img:'🎁', tag:'لایه‌های کادوپیچ', tagSub:'جعبه همان جعبه است؛ هر لایه چیزی اضافه می‌کند.',
+      def:'هدف: افزودن مسئولیت به شیء به‌صورت پویا و بدون ساختن زیرکلاس‌های متعدد. در سامانه گزارش‌گیری، می‌توان خروجی پایه را به‌ترتیب با فشرده‌سازی، رمزنگاری و ثبت لاگ تزئین کرد. هر Decorator همان رابط مؤلفه را پیاده‌سازی می‌کند و شیء قبلی را درون خود نگه می‌دارد.',
+      P:'می‌خواهی <span class="key">در زمان اجرا</span> مسئولیت‌هایی مثل فشرده‌سازی، رمزنگاری و ثبت لاگ را روی هم اضافه کنی، بدون ساختن زیرکلاس برای هر ترکیب.',
+      S:'هر Decorator <span class="key">همان رابط</span> مؤلفه را پیاده‌سازی می‌کند و شیء قبلی را درون خودش نگه می‌دارد. کار خودش را انجام می‌دهد و بقیه را به شیء درونی می‌سپارد.',
+      roles:['Component','ConcreteComponent','Decorator'],
+      code:['interface DataSource: write(data)','class EncryptedSource implements DataSource:','    wrappee: DataSource','    write(data): wrappee.write(encrypt(data))','','src = new EncryptedSource(new CompressedSource(new FileSource()))'],
+      plus:['ترکیب‌پذیری و رعایت Open/Closed'], minus:['زنجیره اشیا ممکن است دشوارتر debug شود','ترتیب Decoratorها می‌تواند نتیجه را تغییر دهد'],
+      check:{ q:'چرا ترتیب Decoratorها مهم است؟', a:'چون هر لایه خروجی لایهٔ بعد را می‌سازد. مثلاً فشرده‌کردن دادهٔ رمزشده تقریباً بی‌اثر است؛ باید اول فشرده و بعد رمز شود.' } },
+    'Proxy': { fam:'struct', fa:'جانشین', img:'🛡️', tag:'منشی و محافظ', tagSub:'تا از منشی رد نشوی، به مدیر نمی‌رسی.',
+      def:'هدف: قرارگرفتن یک شیء واسط به‌جای شیء واقعی برای کنترل دسترسی یا مدیریت چرخه عمر. انواع رایج: Virtual Proxy برای ایجاد تنبل، Protection Proxy برای مجوزدهی، Remote Proxy برای شیء دوردست و Caching Proxy برای ذخیره پاسخ.',
+      P:'می‌خواهی <span class="key">دسترسی</span> به یک شیء را کنترل کنی یا <span class="key">چرخهٔ عمر</span>ش را مدیریت کنی: ساخت دیرهنگام، مجوز، شیء دوردست یا cache.',
+      S:'یک شیء واسط با همان رابط، جای شیء واقعی می‌نشیند و قبل یا بعد از سپردن کار، کنترل خودش را اعمال می‌کند. انواع: Virtual (ایجاد تنبل)، Protection (مجوز)، Remote (شیء دوردست)، Caching (ذخیرهٔ پاسخ).',
+      roles:['Subject','RealSubject','Proxy'],
+      code:['interface Image: display()','class ImageProxy implements Image:','    real: RealImage = null','    display():','        if real == null: real = new RealImage()   // lazy','        real.display()'],
+      plus:['کنترل دسترسی بدون تغییر شیء واقعی','ساخت تنبل و cache'], minus:['یک لایهٔ غیرمستقیم بیشتر و تأخیر احتمالی'],
+      note:'هر دو الگو یک شیء را با شیئی دیگر می‌پوشانند؛ اما هدف آن‌ها متفاوت است. Decorator رفتار را به‌صورت قابل‌ترکیب گسترش می‌دهد، در حالی که Proxy کنترل دسترسی به شیء را بر عهده می‌گیرد.',
+      check:{ q:'تصویر بزرگی که فقط وقتی کاربر به آن اسکرول کرد باید بارگذاری شود: کدام نوع Proxy؟', a:'Virtual Proxy: شیء واقعی را تا اولین استفاده نمی‌سازد.' } },
+    'Composite': { fam:'struct', fa:'ترکیبی', img:'🌳', tag:'پوشه در پوشه', tagSub:'اندازهٔ یک پوشه = جمع اندازهٔ هر چه داخلش است.',
+      def:'هدف: امکان رفتار یکنواخت با اشیای منفرد و مجموعه‌ای از اشیا در ساختار درختی. در فایل‌سیستم، File و Directory می‌توانند رابط مشترکی مانند size یا render داشته باشند. کلاینت لازم نیست برای برگ و شاخه منطق کاملاً جدا بنویسد.',
+      P:'ساختار <span class="key">درختی</span> داری و می‌خواهی با یک شیء تنها و یک گروه از اشیا <span class="key">یکسان</span> رفتار کنی.',
+      S:'برگ (File) و شاخه (Directory) یک رابط مشترک مثل size() یا render() دارند. شاخه کار را به فرزندانش می‌سپارد. کلاینت لازم نیست برای برگ و شاخه منطق جدا بنویسد.',
+      roles:['Component','Leaf','Composite'],
+      code:['interface Node: size()','class File implements Node:','    size(): return bytes','class Directory implements Node:','    children: List<Node>','    size(): return sum(c.size() for c in children)'],
+      plus:['کلاینت ساده؛ یک کد برای همه','افزودن نوع گره تازه آسان'], minus:['محدود کردن اینکه چه چیزی فرزند چه باشد سخت‌تر می‌شود'],
+      check:{ q:'دو مثال دیگر از ساختار Composite نام ببر.', a:'اجزای رابط کاربری (پنل داخل پنل)، منوها و زیرمنوها، نمودار سازمانی، عبارت‌های ریاضی تودرتو.' } },
+    'Bridge': { fam:'struct', fa:'پل', img:'🌉', tag:'کنترل × تلویزیون', tagSub:'هر کنترلی با هر تلویزیونی؛ دو محور جدا.',
+      def:'هدف: جداکردن abstraction از implementation تا هر دو مستقل از هم توسعه یابند. فرض کنید نوع اعلان (ساده، فوری، زمان‌بندی‌شده) و کانال ارسال (ایمیل، پیامک، پوش) دو محور تغییر باشند. اگر با وراثت ترکیب شوند، تعداد زیرکلاس‌ها زیاد می‌شود؛ Bridge این دو بُعد را با ترکیب مستقل می‌کند.',
+      P:'دو محور تغییر داری؛ مثلاً نوع اعلان (ساده، فوری، زمان‌بندی‌شده) و کانال ارسال (ایمیل، پیامک، پوش). با وراثت، تعداد زیرکلاس‌ها <span class="key">ضرب</span> می‌شود.',
+      S:'abstraction (نوع اعلان) را از implementation (کانال) جدا کن و با <span class="key">ترکیب</span> وصلشان کن، تا هر دو مستقل توسعه یابند.',
+      roles:['Abstraction','RefinedAbstraction','Implementor','ConcreteImplementor'],
+      code:['abstract class Notification:','    sender: Sender                 // the bridge','    abstract notifyUser(msg)','class UrgentNotification extends Notification:','    notifyUser(msg): sender.send("[URGENT] " + msg)','','new UrgentNotification(new SmsSender())'],
+      plus:['کلاس‌ها جمع می‌شوند، نه ضرب','هر محور مستقل رشد می‌کند'], minus:['طراحی اولیه انتزاعی‌تر و کمی سخت‌تر برای فهم'],
+      check:{ q:'۴ نوع اعلان و ۵ کانال: با وراثت چند کلاس، با Bridge چند کلاس؟', a:'وراثت: ۴ × ۵ = ۲۰ کلاس. Bridge: ۴ + ۵ = ۹ کلاس.' } },
+    'Flyweight': { fam:'struct', fa:'سبک‌وزن', img:'🪶', tag:'حروف مشترک', tagSub:'کتاب هزار «الف» دارد، ولی شکل «الف» یک بار ذخیره می‌شود.',
+      def:'هدف: کاهش مصرف حافظه با اشتراک وضعیت ذاتی (Intrinsic) میان تعداد زیادی شیء مشابه. وضعیت بیرونی (Extrinsic) که وابسته به موقعیت یا زمینه است، هنگام استفاده به شیء داده می‌شود. نمونه: حروف یا نمادهای تکراری در ویرایشگر متن یا اشیای درختی پرتعداد در بازی.',
+      P:'<span class="key">تعداد زیادی شیء مشابه</span> داری (کاراکترهای ویرایشگر، درخت‌ها یا ذرات بازی) و حافظه تمام می‌شود.',
+      S:'وضعیت را دو تکه کن: <b>ذاتی (Intrinsic)</b> که مشترک است و یک بار ذخیره می‌شود، و <b>بیرونی (Extrinsic)</b> که به موقعیت یا زمینه وابسته است و هنگام استفاده به شیء داده می‌شود. یک Factory اشیای اشتراکی را نگه می‌دارد.',
+      roles:['FlyweightFactory','Flyweight','intrinsic','extrinsic'],
+      code:['class Glyph:                 // intrinsic: font, shape (shared)','    draw(x, y)                // extrinsic: position passed in','','a1 = glyphs.get("a")','a2 = glyphs.get("a")         // same object as a1','a1.draw(10, 20);  a2.draw(30, 20)'],
+      plus:['کاهش شدید مصرف حافظه'], minus:['مدیریت وضعیت بیرونی پیچیدگی می‌آورد'],
+      note:'هشدار Flyweight: اشتراک state فقط وقتی مفید است که تعداد نمونه‌ها زیاد و بخش بزرگی از داده‌ها مشترک باشد. پیچیدگی مدیریت state بیرونی را در محاسبه هزینه لحاظ کنید.',
+      check:{ q:'در یک بازی با ۱۰۰ هزار درخت، چه چیزی ذاتی و چه چیزی بیرونی است؟', a:'ذاتی: مدل سه‌بعدی، بافت و رنگ نوع درخت (مشترک). بیرونی: مکان، اندازه و چرخش هر درخت.' } },
+    'Strategy': { fam:'behave', fa:'راهبرد', img:'🧭', tag:'انتخاب مسیر در مسیریاب', tagSub:'همان ماشین؛ مسیر سریع‌تر، کوتاه‌تر یا بدون عوارض.',
+      def:'هدف: تعریف مجموعه‌ای از الگوریتم‌های هم‌خانواده، قرار دادن هر کدام در کلاسی جدا و امکان انتخاب یا تعویض آن‌ها در زمان اجرا. کاربردها: روش محاسبه تخفیف، مسیریابی، رتبه‌بندی، فشرده‌سازی یا سیاست احراز هویت.',
+      P:'<span class="key">خانواده‌ای از الگوریتم‌های هم‌خانواده</span> داری و باید در زمان اجرا یکی را انتخاب یا عوض کنی؛ مثل محاسبهٔ تخفیف، هزینهٔ ارسال، مسیریابی، رتبه‌بندی، فشرده‌سازی یا سیاست احراز هویت.',
+      S:'هر الگوریتم را در کلاسی جدا پشت یک رابط مشترک بگذار. کلاس مصرف‌کننده (Context) یک Strategy نگه می‌دارد و فقط آن را صدا می‌زند.',
+      roles:['Context','Strategy','ConcreteStrategy'],
+      code:['interface ShippingStrategy: cost(order): Money','class ExpressShipping implements ShippingStrategy:','    cost(o): return o.weight() * 3','','class Checkout:','    strategy: ShippingStrategy','    shipping(o): return strategy.cost(o)'],
+      plus:['حذف شرط‌های بزرگ if/switch و افزودن الگوریتم جدید با تغییر محدود'], minus:['افزایش تعداد کلاس‌ها و نیاز به تصمیم‌گیری درباره انتخاب راهبرد'],
+      check:{ q:'این الگو را از کجای دوره می‌شناسی؟', a:'درس ۱ (صندوق پرداخت با کارت، کیف پول و بانک) و درس ۲ (اصل باز/بسته با هزینهٔ ارسال).' } },
+    'Observer': { fam:'behave', fa:'ناظر', img:'📣', tag:'دکمهٔ دنبال‌کردن', tagSub:'کانال ویدیو منتشر می‌کند؛ هر کس دنبال کرده خبردار می‌شود.',
+      def:'هدف: تعریف رابطه یک-به-چند؛ با تغییر وضعیت Subject، ناظران ثبت‌شده مطلع می‌شوند. نمونه‌ها: اعلان تغییر قیمت، به‌روزرسانی نما پس از تغییر مدل و انتشار رویداد سفارش. ناشر لازم نیست جزئیات همه مشترکان را بداند.',
+      P:'وقتی وضعیت یک شیء عوض می‌شود، <span class="key">چند شیء دیگر</span> باید خبردار شوند؛ ولی ناشر نباید جزئیات همهٔ مشترکان را بداند. مثل اعلان تغییر قیمت یا انتشار رویداد سفارش.',
+      S:'رابطهٔ <span class="key">یک-به-چند</span>: Subject فهرستی از Observerها نگه می‌دارد؛ هر کس می‌تواند ثبت‌نام یا لغو کند؛ با هر تغییر، Subject به همه اطلاع می‌دهد.',
+      roles:['Subject','Observer','ConcreteObserver'],
+      code:['interface Observer: update(event)','class OrderSubject:','    observers: List<Observer>','    subscribe(o): observers.add(o)','    publish(e): for o in observers: o.update(e)'],
+      plus:['ناشر و مشترک سست به هم وصل‌اند','افزودن مشترک تازه بدون تغییر ناشر'], minus:['ترتیب اعلان‌ها و خطای یک ناظر باید مدیریت شود','نشت حافظه اگر لغو اشتراک فراموش شود'],
+      note:'نکته عملیاتی: در سیستم‌های توزیع‌شده، Observer اغلب به شکل event bus یا message broker پیاده می‌شود. ترتیب تحویل، تکرار پیام، خطا و idempotency باید جداگانه طراحی شود.',
+      check:{ q:'ناشر در Observer چه چیزی از مشترکانش می‌داند؟', a:'فقط اینکه رابط Observer را دارند (متد update). نه نوعشان را می‌داند و نه کاری که با خبر می‌کنند.' } },
+    'State': { fam:'behave', fa:'وضعیت', img:'🚦', tag:'چراغ راهنما', tagSub:'همان چراغ؛ قرمز می‌گوید بایست، سبز می‌گوید برو.',
+      def:'هدف: اجازه‌دادن به یک شیء تا رفتار خود را بر اساس وضعیت داخلی تغییر دهد؛ گویی کلاس آن تغییر کرده است. به‌جای شرط‌های متداخل برای حالت‌های سفارش (جدید، پرداخت‌شده، ارسال‌شده، لغوشده)، هر حالت قواعد انتقال و رفتار مجاز را پیاده‌سازی می‌کند.',
+      P:'رفتار شیء به <span class="key">وضعیت داخلی</span>ش بستگی دارد و کد پر از شرط‌های تودرتو شده؛ مثلاً سفارش جدید، پرداخت‌شده، ارسال‌شده، لغوشده.',
+      S:'هر وضعیت یک کلاس است که قواعد، انتقال‌ها و رفتار مجاز همان وضعیت را پیاده می‌کند. شیء وضعیت فعلی را نگه می‌دارد و کار را به آن می‌سپارد؛ گویی کلاسش عوض شده است.',
+      roles:['Context','State','ConcreteState'],
+      code:['interface OrderState: pay(order)   ship(order)','class PaidState implements OrderState:','    pay(o):  reject("duplicate payment")','    ship(o): o.setState(new ShippedState())'],
+      plus:['حذف شرط‌های تودرتو','قواعد هر وضعیت یک جا'], minus:['کلاس‌های زیاد برای وضعیت‌های کم'],
+      check:{ q:'تفاوت State و Strategy چیست؟ هر دو شبیه‌اند!', a:'در Strategy کلاینت از بیرون الگوریتم را انتخاب می‌کند. در State خود وضعیت‌ها انتقال بعدی را تعیین می‌کنند و رفتار با چرخهٔ عمر شیء عوض می‌شود.' } },
+    'Template Method': { fam:'behave', fa:'روش قالب', img:'📝', tag:'فرم با جای خالی', tagSub:'فرم ثابت است؛ فقط جاهای خالی را پر می‌کنی.',
+      def:'هدف: تعریف اسکلت یک الگوریتم در کلاس پایه و واگذاری بعضی گام‌ها به زیرکلاس‌ها. مثلاً فرایند import شامل خواندن، اعتبارسنجی، تبدیل و ذخیره است؛ قالب کلی ثابت است اما فرمت CSV و JSON گام‌های مخصوص خود را دارند. با hook می‌توان برخی گام‌ها را اختیاری کرد.',
+      P:'یک روند <span class="key">ثابت</span> چند گام دارد، ولی بعضی گام‌ها برای هر نوع فرق می‌کند؛ مثلاً import: خواندن، اعتبارسنجی، تبدیل، ذخیره، برای CSV و JSON.',
+      S:'اسکلت الگوریتم را در کلاس پایه تعریف کن و بعضی گام‌ها را به زیرکلاس‌ها بسپار. با <span class="key">hook</span> می‌توان برخی گام‌ها را اختیاری کرد.',
+      roles:['AbstractClass','templateMethod()','ConcreteClass','hook'],
+      code:['abstract class Importer:','    run(file):                 // the fixed template','        rows = read(file)','        validate(rows)','        save(transform(rows))','    abstract read(file)','    abstract transform(rows)','    validate(rows): ...         // hook: optional override','class CsvImporter extends Importer: read(...)  transform(...)'],
+      plus:['ترتیب گام‌ها یک جا تضمین می‌شود','کد مشترک تکرار نمی‌شود'], minus:['وابسته به وراثت؛ تغییر کلاس پایه روی همهٔ زیرکلاس‌ها اثر دارد'],
+      check:{ q:'Template Method و Strategy هر دو بخشی از الگوریتم را عوض می‌کنند. فرقشان در ابزار چیست؟', a:'Template Method با وراثت (زیرکلاس گام را پر می‌کند)، Strategy با ترکیب (یک شیء الگوریتم کامل را می‌دهد).' } },
+    'Iterator': { fam:'behave', fa:'تکرارگر', img:'⏭️', tag:'دکمهٔ «بعدی» در پلی‌لیست', tagSub:'نمی‌دانی آهنگ‌ها کجا ذخیره شده‌اند؛ فقط «بعدی» می‌زنی.',
+      def:'هدف: دسترسی ترتیبی به عناصر یک مجموعه بدون افشای نمایش داخلی آن. Iterator عملیات‌هایی مانند hasNext و next را ارائه می‌کند. در زبان‌های مدرن، iteratorها و generatorها اغلب این الگو را به‌صورت زبانی یا کتابخانه‌ای فراهم می‌کنند.',
+      P:'می‌خواهی عناصر یک مجموعه را <span class="key">به ترتیب</span> پیمایش کنی، بدون اینکه نمایش داخلی‌اش (آرایه، درخت، فایل) را بدانی.',
+      S:'یک شیء Iterator با عملیاتی مثل hasNext و next بساز. در زبان‌های مدرن iteratorها و generatorها این الگو را به شکل زبانی یا کتابخانه‌ای فراهم می‌کنند.',
+      roles:['Iterable','Iterator','hasNext()','next()'],
+      code:['it = playlist.iterator()','while it.hasNext():','    play(it.next())','','// modern languages:','for song in playlist: play(song)'],
+      plus:['یک روش پیمایش برای انواع مجموعه','ساختار داخلی پنهان می‌ماند'], minus:['معمولاً لازم نیست خودت بسازی؛ زبان دارد'],
+      check:{ q:'وقتی در پایتون می‌نویسی for x in items از کدام الگو استفاده می‌کنی؟', a:'Iterator. زبان آن را برایت ساخته است.' } },
+    'Command': { fam:'behave', fa:'فرمان', img:'🧾', tag:'برگهٔ سفارش رستوران', tagSub:'گارسون سفارش را روی برگه می‌نویسد؛ آشپزخانه بعداً اجرایش می‌کند.',
+      def:'هدف: تبدیل درخواست به یک شیء مستقل شامل عملیات و پارامترها. این کار امکان صف‌بندی، ثبت تاریخچه، زمان‌بندی، retry و undo را فراهم می‌کند. برای مثال، دکمه رابط کاربری فقط یک Command را اجرا می‌کند و از جزئیات عملیات خبر ندارد.',
+      P:'می‌خواهی درخواست‌ها را <span class="key">ذخیره، صف‌بندی، زمان‌بندی، تکرار (retry) یا معکوس (undo)</span> کنی، یا دکمه‌ای بسازی که از جزئیات عملیات خبر ندارد.',
+      S:'درخواست را به یک <span class="key">شیء مستقل</span> شامل عملیات و پارامترها تبدیل کن. دکمهٔ رابط کاربری فقط execute() را صدا می‌زند.',
+      roles:['Command','ConcreteCommand','Invoker','Receiver'],
+      code:['interface Command: execute()   undo()','class SaveDocument implements Command:','    editor: Editor','    execute(): editor.save()','','button.onClick = () => command.execute()','history.push(command)          // enables undo'],
+      plus:['صف، تاریخچه، undo و retry','فرستنده از گیرنده جدا می‌شود'], minus:['یک کلاس برای هر عملیات'],
+      check:{ q:'برای پیاده‌سازی undo، هر Command چه چیزی کم دارد؟', a:'یک متد undo() و اطلاعات کافی برای برگرداندن اثرش، و یک تاریخچه که Commandهای اجراشده را نگه دارد.' } },
+    'Chain of Responsibility': { fam:'behave', fa:'زنجیرهٔ مسئولیت', img:'☎️', tag:'ارجاع پشتیبانی', tagSub:'کارشناس سطح ۱ نتوانست؟ به سطح ۲ می‌رود.',
+      def:'هدف: عبور درخواست از زنجیره‌ای از handlerها تا یکی از آن‌ها آن را پردازش کند یا زنجیره ادامه یابد. نمونه‌ها: middlewareهای HTTP، فیلتر درخواست، پشتیبانی فنی سطح یک تا سه و اعتبارسنجی چندمرحله‌ای. باید رفتار در صورت عدم رسیدگی و ترتیب زنجیره شفاف باشد.',
+      P:'نمی‌دانی <span class="key">کدام جزء</span> باید درخواست را رسیدگی کند، یا درخواست باید از چند مرحله رد شود؛ مثل middlewareهای HTTP، فیلتر درخواست یا اعتبارسنجی چندمرحله‌ای.',
+      S:'درخواست از زنجیره‌ای از handlerها عبور می‌کند تا یکی آن را پردازش کند یا زنجیره ادامه یابد. هر handler فقط بعدی را می‌شناسد.',
+      roles:['Handler','ConcreteHandler','next'],
+      code:['abstract class Handler:','    next: Handler','    handle(req):','        if canHandle(req): process(req)','        else if next: next.handle(req)','        else: fallback(req)            // decide this!'],
+      plus:['فرستنده گیرندهٔ نهایی را نمی‌شناسد','افزودن یا جابه‌جایی مرحله آسان'], minus:['اگر کسی رسیدگی نکند؟ باید رفتارش روشن باشد','ترتیب زنجیره اثر دارد'],
+      check:{ q:'در طراحی Chain دو چیز را حتماً باید شفاف کنی. چه چیزهایی؟', a:'رفتار در صورت عدم رسیدگی (آخر زنجیره چه می‌شود)، و ترتیب handlerها.' } },
+    'Mediator': { fam:'behave', fa:'میانجی', img:'🗼', tag:'برج مراقبت فرودگاه', tagSub:'هواپیماها با هم حرف نمی‌زنند؛ همه با برج حرف می‌زنند.',
+      def:'هدف: متمرکزکردن تعاملات پیچیده میان چند جزء در یک میانجی، به‌جای آنکه هر جزء مستقیماً با همه اجزا ارتباط داشته باشد. نمونه: فرم دارای فیلدها و دکمه‌های وابسته؛ فعال‌شدن یک گزینه می‌تواند از طریق mediator وضعیت چند کنترل دیگر را تنظیم کند.',
+      P:'چند جزء همه با هم حرف می‌زنند و تعاملات درهم شده‌اند؛ مثلاً فرمی که فعال‌شدن یک گزینه وضعیت چند کنترل دیگر را عوض می‌کند. با ۵ جزء تا <span class="key">۱۰ ارتباط مستقیم</span> داری.',
+      S:'تعاملات را در یک <span class="key">میانجی</span> متمرکز کن: هر جزء فقط به میانجی خبر می‌دهد و میانجی تصمیم می‌گیرد چه کسی چه کند. ۵ جزء = ۵ ارتباط.',
+      roles:['Mediator','Colleague'],
+      code:['class CheckoutFormMediator:','    notify(sender, event):','        if sender == giftCheckbox and event == "checked":','            giftMessageField.enable()','        submitButton.setEnabled(allFieldsValid())'],
+      plus:['اجزا مستقل و قابل استفادهٔ مجدد','منطق هماهنگی یک جا'], minus:['میانجی ممکن است خودش کلاس همه‌کاره شود'],
+      note:'تمایز مهم: Command درباره نمایش یک درخواست است؛ Chain درباره عبور درخواست میان handlerها؛ Mediator درباره هماهنگ‌کردن تعامل چند همکار.',
+      check:{ q:'تفاوت Mediator با Observer چیست؟', a:'Observer یک ناشر و چند مشترک دارد و جهت خبر یک‌طرفه است. Mediator هماهنگ‌کنندهٔ چند همکار است که همه با او در دو جهت حرف می‌زنند.' } },
+    'Visitor': { fam:'behave', fa:'بازدیدکننده', img:'🕵️', tag:'بازرس مالیاتی', tagSub:'بازرس به هر مغازه سر می‌زند و برای هر نوع مغازه فرم خودش را پر می‌کند.',
+      def:'هدف: تعریف عملیات جدید روی ساختاری از انواع عناصر، بدون افزودن همان عملیات به کلاس هر عنصر. هر عنصر متد accept دارد و visitor متد متناظر با نوع عنصر را اجرا می‌کند. کاربرد: تحلیل AST، گزارش‌گیری روی ساختارهای سند و عملیات روی اجزای مدل. نقطه ضعف: افزودن نوع عنصر جدید دشوارتر می‌شود، چون Visitorها باید توسعه یابند.',
+      P:'ساختاری از <span class="key">انواع ثابت عناصر</span> داری (مثل AST یا اجزای سند) و مدام می‌خواهی <span class="key">عملیات تازه</span> رویش اضافه کنی، بدون دست‌زدن به کلاس هر عنصر.',
+      S:'هر عنصر متد accept(visitor) دارد و visitor متد متناظر با نوع عنصر را اجرا می‌کند. عملیات تازه = یک Visitor تازه.',
+      roles:['Visitor','ConcreteVisitor','Element','accept()'],
+      code:['interface Visitor: visitText(t)   visitImage(i)','class Text:  accept(v): v.visitText(this)','class Image: accept(v): v.visitImage(this)','','class WordCounter implements Visitor: ...','for el in document: el.accept(counter)'],
+      plus:['افزودن عملیات تازه بدون تغییر عناصر'], minus:['نقطه ضعف: افزودن نوع عنصر جدید دشوارتر می‌شود، چون Visitorها باید توسعه یابند.'],
+      check:{ q:'کِی Visitor انتخاب بدی است؟', a:'وقتی انواع عناصر مدام عوض می‌شوند یا اضافه می‌شوند؛ چون هر نوع تازه یعنی تغییر همهٔ Visitorها.' } },
+    'Memento': { fam:'behave', fa:'یادگار', img:'💾', tag:'ذخیرهٔ بازی', tagSub:'قبل از غول آخر save می‌کنی؛ باختی، برمی‌گردی.',
+      def:'هدف: ثبت و بازیابی وضعیت داخلی یک شیء، بدون افشای جزئیات پیاده‌سازی آن به نگهدارنده تاریخچه. قابلیت undo در ویرایشگر متن نمونه متداولی است. باید هزینه حافظه، عمق تاریخچه و سیاست حذف snapshotهای قدیمی مدیریت شود.',
+      P:'باید وضعیت داخلی یک شیء را <span class="key">ثبت و بعداً بازیابی</span> کنی (undo در ویرایشگر)، بدون اینکه جزئیات پیاده‌سازی‌اش را به نگهدارندهٔ تاریخچه نشان دهی.',
+      S:'شیء خودش یک snapshot (Memento) می‌سازد و بعداً از آن بازیابی می‌کند. نگهدارنده (Caretaker) فقط snapshotها را نگه می‌دارد و داخلشان را نمی‌بیند.',
+      roles:['Originator','Memento','Caretaker'],
+      code:['class Editor:','    save(): return Memento(text, cursor)','    restore(m): text = m.text; cursor = m.cursor','','history.push(editor.save())','editor.restore(history.pop())     // undo'],
+      plus:['undo بدون شکستن کپسوله‌سازی'], minus:['باید هزینه حافظه، عمق تاریخچه و سیاست حذف snapshotهای قدیمی مدیریت شود.'],
+      check:{ q:'Command و Memento هر دو برای undo استفاده می‌شوند. فرقشان؟', a:'Command عملیات را معکوس اجرا می‌کند (undo هر کار)؛ Memento کل وضعیت قبلی را ذخیره و برمی‌گرداند.' } },
+    'Interpreter': { fam:'behave', fa:'مفسر', img:'🗣️', tag:'زبان کوچک', tagSub:'یک دستور زبان کوچک، و کسی که بلد است آن را بخواند.',
+      def:'هدف: تعریف نمایش و مفسر ساده برای یک زبان محدود یا grammar مشخص. نمونه: ارزیابی عبارت‌های فیلتر، قوانین ساده جست‌وجو یا زبان پیکربندی کوچک. برای زبان‌های پیچیده، استفاده از parser generator یا ابزارهای تخصصی معمولاً بهتر از پیاده‌سازی دستی الگو است.',
+      P:'یک <span class="key">زبان محدود</span> یا grammar مشخص داری؛ مثل عبارت‌های فیلتر، جست‌وجوی ساده یا زبان پیکربندی کوچک.',
+      S:'هر قاعدهٔ grammar یک کلاس است و عبارت به شکل درختی از این اشیا ساخته می‌شود؛ هر گره eval خودش را دارد.',
+      roles:['AbstractExpression','TerminalExpression','NonterminalExpression','Context'],
+      code:['interface Expr: eval(ctx)','class Eq(field, value):  eval(ctx): ctx[field] == value','class And(left, right):  eval(ctx): left.eval(ctx) and right.eval(ctx)','','rule = And(Eq("city", "Tehran"), Eq("paid", true))','rule.eval(order)'],
+      plus:['زبان کوچک خوانا و قابل گسترش'], minus:['برای زبان‌های پیچیده بسیار سنگین می‌شود'],
+      note:'برای زبان‌های پیچیده، استفاده از parser generator یا ابزارهای تخصصی معمولاً بهتر از پیاده‌سازی دستی الگو است.',
+      check:{ q:'Interpreter به کدام الگوی ساختاری شبیه است؟', a:'Composite: عبارت یک درخت است و هر گره (مثل And) کار را به فرزندانش می‌سپارد.' } }
+  };
+  const pn = k => '<span class="pn ' + FAM[PAT[k].fam][1] + '">' + k + '</span>';
+  const ax = (k, extra) => '<span class="pn fX">' + k + '</span>' + (extra || '');
+
+  let sceneNo = 0;
+  const head = (eyebrow, h, d0) => '<div class="eyebrow a">صحنهٔ ' + fa(++sceneNo) + ' · ' + eyebrow + '</div>' + (h ? '<h2 class="a" style="--d:' + (d0 || 60) + '">' + h + '</h2>' : '');
+  const checkHTML = (c, d) => '<div class="check a" style="--d:' + d + '"><p>' + c.q + '</p><details><summary>اول فکر کن، بعد بزن تا ببینی</summary><p>' + c.a + '</p></details></div>';
+  const codeHTML = lines => '<pre class="code">' + lines.map(l => '<span>' + fmt(l) + '</span>').join('') + '</pre>';
+
+  function rPattern(k) {
+    const p = PAT[k], f = FAM[p.fam];
+    return head('الگوی ' + f[0], '') +
+      '<div class="phead a" style="--d:60"><span class="pimg" aria-hidden="true">' + p.img + '</span><span class="t"><h2>' + pn(k) + ' <span class="hint" style="font-size:18px">' + p.fa + '</span></h2>' +
+      '<span class="tagline"><b>' + p.tag + '</b> · ' + p.tagSub + '</span></span></div>' +
+      (p.def ? '<blockquote class="bookq a" style="--d:110"><span class="bql">📖 متن جزوه (عین کلمات)</span>' + p.def + '</blockquote>' : '') +
+      '<div class="pcard">' +
+        '<div class="pb a" style="--d:160;--bc:var(--n)"><span class="L">ن</span><div><span class="h">نام و تصویر</span>' + pn(k) + ' · ' + p.fa + ' · ' + p.img + ' ' + p.tag + '</div></div>' +
+        '<div class="pb a" style="--d:240;--bc:var(--p)"><span class="L">م</span><div><span class="h">زمینه و مسئله</span>' + p.P + '</div></div>' +
+        '<div class="pb wide a" style="--d:320;--bc:var(--s)"><span class="L">ر</span><div><span class="h">راه‌حل</span>' + p.S +
+          '<div class="roles"><span class="rl">نقش‌ها:</span>' + p.roles.map(r => '<span class="r">' + esc(r) + '</span>').join('') + '</div>' + codeHTML(p.code) + '</div></div>' +
+        '<div class="pb wide a" style="--d:400;--bc:var(--c)"><span class="L">پ</span><div><span class="h">پیامدها</span><ul>' +
+          p.plus.map(x => '<li class="plus">' + x + '</li>').join('') + p.minus.map(x => '<li class="minus">' + x + '</li>').join('') + '</ul>' +
+          (p.note ? '<p class="effect" style="margin-top:6px">' + p.note + '</p>' : '') + '</div></div>' +
+      '</div>' + checkHTML(p.check, 480);
+  }
+  function rText(s) { return head(s.eyebrow, s.h) + (s.lead ? '<p class="lead a" style="--d:120">' + s.lead + '</p>' : '') + '<div class="a" style="--d:200;display:flex;flex-direction:column;gap:16px">' + s.html + '</div>' + (s.check ? checkHTML(s.check, 320) : ''); }
+  function rQs(s) { return head(s.eyebrow || 'تمرین', s.h) + (s.sub ? '<p class="sub a" style="--d:120">' + s.sub + '</p>' : '') + '<div data-qs style="display:flex;flex-direction:column;gap:12px"></div>'; }
+  function rSort(s) { return head(s.eyebrow || 'دسته‌بندی کن', s.h) + (s.sub ? '<p class="sub a" style="--d:120">' + s.sub + '</p>' : '') + '<div class="q a" style="--d:200"><div class="sort" data-sort></div></div>'; }
+  function rCustom(s) { return head(s.eyebrow || 'امتحانش کن', s.h) + (s.sub ? '<p class="sub a" style="--d:120">' + s.sub + '</p>' : '') + '<div class="ia a" style="--d:200" data-custom="' + s.name + '"></div>' + (s.check ? checkHTML(s.check, 320) : ''); }
+  function rQuiz(def) {
+    const id = def.id;
+    return head('خودت را بسنج (سؤال‌ها درهم از این درس و درس‌های قبل)', '') +
+      '<div class="two"><div class="quiz" data-quiz="' + id + '"><h2 class="a" style="--d:60">اول به یاد بیاور، بعد مرور کن</h2><p class="sub a" style="--d:120">کارت خلاصه بعد از آخرین سؤال باز می‌شود.</p></div>' +
+      '<div style="display:flex;flex-direction:column;gap:16px">' +
+        '<div class="locked a" style="--d:200" data-locked="' + id + '"><span>' + def.icon + ' کارت خلاصهٔ درس ' + fa(id) + ' تا پایان آزمون پنهان است. بیرون‌کشیدن جواب از حافظه آن را ماندگار می‌کند.</span><button class="ghost" data-peek="' + id + '">با این حال نشانم بده</button></div>' +
+        '<div class="flash" data-flash="' + id + '" hidden><div class="eyebrow">' + def.icon + ' کارت درس ' + fa(id) + '</div>' +
+          def.card.map(([m, t]) => '<div class="ln"><b>' + m + '</b><span>' + t + '</span></div>').join('') + '</div>' +
+        '<div class="plan a" style="--d:300"><span class="eyebrow">برنامهٔ مرور فاصله‌دار</span><p style="font-size:14px">در این روزها فقط همین آزمون را با کارت پنهان دوباره بده.</p><ol data-plan="' + id + '"></ol>' +
+          (def.next ? '<p class="hint">بعدی: ' + def.next + '</p>' : '<p class="hint">این آخرین درس بود. مرور فاصله‌دار را ادامه بده.</p>') + '</div>' +
+      '</div></div>';
+  }
+  function sortRows(box, s) {
+    s.items.forEach(([txt, idx, fb]) => {
+      const row = document.createElement('div');
+      row.className = 'srow';
+      row.innerHTML = '<span class="it">' + txt + '</span><span class="opts row">' +
+        s.labels.map((l, k) => '<button class="opt" data-ok="' + (k === idx ? 1 : 0) + '">' + l + '</button>').join('') + '</span>' +
+        '<span class="fb why" hidden>' + fb + '</span>';
+      box.appendChild(row); wireOpts(row);
+    });
+  }
+  function warmUp(qs) { return { t:'qs', eyebrow:'گرم‌کردن: مرور درس‌های قبل و یک حدس', h:'قبل از شروع، از حافظه جواب بده.', sub:'سؤال‌های قدیمی بعد از چند روز، و حدس دربارهٔ درس تازه، هر دو یادگیری را ماندگارتر می‌کنند.', qs:qs }; }
+  const Q = (q, o, a, w) => ({ q, o, a, w });
+  /* ---------- نمادهای UML (برای درس ۳) ---------- */
+  const SYM = {
+    assoc:'<line x1="4" y1="12" x2="104" y2="12"/>',
+    inherit:'<line x1="4" y1="12" x2="92" y2="12"/><polygon points="106,12 92,5 92,19" style="fill:var(--surface)"/>',
+    realize:'<line x1="4" y1="12" x2="92" y2="12" stroke-dasharray="6 4"/><polygon points="106,12 92,5 92,19" style="fill:var(--surface)"/>',
+    depend:'<line x1="4" y1="12" x2="104" y2="12" stroke-dasharray="6 4"/><polyline points="94,5 105,12 94,19" fill="none"/>',
+    compose:'<polygon points="4,12 15,6 26,12 15,18" style="fill:currentColor"/><line x1="26" y1="12" x2="104" y2="12"/>',
+    aggreg:'<polygon points="4,12 15,6 26,12 15,18" style="fill:var(--surface)"/><line x1="26" y1="12" x2="104" y2="12"/>'
+  };
+  const sym = k => '<svg class="sym" viewBox="0 0 110 24" stroke="currentColor" stroke-width="1.8" fill="none" aria-hidden="true">' + SYM[k] + '</svg>';
+  const STRAT_UML = '<div class="tw" style="direction:ltr"><svg viewBox="0 0 520 190" style="width:100%;min-width:420px;display:block;color:var(--ink)" role="img" aria-label="نمودار کلاس Strategy: Checkout یک PaymentMethod نگه می‌دارد؛ CardPayment و WalletPayment آن را پیاده‌سازی می‌کنند">' +
+    '<g stroke="currentColor" stroke-width="1.8" fill="none">' +
+    '<rect x="10" y="64" width="130" height="44" rx="4" style="fill:var(--surface)"/>' +
+    '<rect x="250" y="10" width="200" height="54" rx="4" style="fill:var(--surface)"/>' +
+    '<rect x="200" y="130" width="130" height="40" rx="4" style="fill:var(--surface)"/>' +
+    '<rect x="360" y="130" width="140" height="40" rx="4" style="fill:var(--surface)"/>' +
+    '<polygon points="140,86 152,80 164,86 152,92" style="fill:var(--surface)"/><line x1="164" y1="86" x2="250" y2="40"/>' +
+    '<line x1="265" y1="130" x2="350" y2="80" stroke-dasharray="6 4"/><line x1="430" y1="130" x2="350" y2="80" stroke-dasharray="6 4"/>' +
+    '<polygon points="350,64 342,80 358,80" style="fill:var(--surface)"/></g>' +
+    '<g style="fill:var(--ink);font-family:var(--f-mono);font-size:13px" text-anchor="middle">' +
+    '<text x="75" y="91">Checkout</text><text x="350" y="31" style="font-size:11px;fill:var(--muted)">«interface»</text><text x="350" y="51">PaymentMethod</text>' +
+    '<text x="265" y="155">CardPayment</text><text x="430" y="155">WalletPayment</text></g>' +
+    '<g style="fill:var(--muted);font-family:var(--f-body);font-size:12px" text-anchor="middle"><text x="75" y="126">Context</text><text x="470" y="48" text-anchor="start">Strategy</text><text x="350" y="186">ConcreteStrategy</text></g>' +
+    '</svg></div>';
+
+  const famCol = (fk, title, img, mnem, goal, keys) => '<div class="famcol" style="--fc:var(--' + fk + ')"><span class="big" aria-hidden="true">' + img + '</span><h3>' + title + '</h3><b>' + mnem + '</b><p style="font-size:14px">' + goal + '</p><div class="chips">' + keys.map(k => '<span class="tag">' + PAT[k].img + ' ' + pn(k) + '</span>').join('') + '</div></div>';
+  const FAMS_HTML = '<div class="famcols">' +
+    famCol('create','ایجادگرا','🌱','تولد: اشیا چطور ساخته می‌شوند','مدیریت چگونگی ایجاد اشیا و پنهان‌کردن جزئیات ساخت.',['Singleton','Factory Method','Abstract Factory','Builder','Prototype']) +
+    famCol('struct','ساختاری','🦴','بدن: اجزا چطور کنار هم می‌نشینند','ترکیب کلاس‌ها و اشیا برای ساخت ساختارهای بزرگ‌تر.',['Adapter','Facade','Decorator','Proxy','Composite','Bridge','Flyweight']) +
+    famCol('behave','رفتاری','💬','رفتار: اشیا چطور با هم حرف می‌زنند','مدیریت تعامل، توزیع مسئولیت و جریان درخواست‌ها.',['Strategy','Observer','State','Template Method','Iterator','Command','Chain of Responsibility','Mediator','Visitor','Memento','Interpreter']) + '</div>';
+  const FAMLAB = ['ایجادگرا','ساختاری','رفتاری'];
+  const table = (heads, rows) => '<div class="tw"><table class="t"><thead><tr>' + heads.map(h => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' + rows.map(r => '<tr>' + r.map(c => '<td>' + c + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+  const N_ = '<b class="N">ن</b>', P_ = '<b class="P">م</b>', S_ = '<b class="S">ر</b>', C_ = '<b class="C">پ</b>';
+
+  const LESSONS = [
+  /* ===================== درس ۳ ===================== */
+  { id:3, icon:'🗺️', title:'سه خانواده و خواندن UML', next:'درس ۴ · Singleton و Factory Method', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۱:</span> حرف '+S_+' روی کارت الگو یعنی…', [N_+' نام', S_+' راه‌حل: نقش‌ها و همکاری‌شان', C_+' پیامد'], 1, 'ر = راه‌حل.'),
+      Q('<span class="hint">از درس ۲:</span> «رفتار تازه = کلاس تازه، نه ویرایش کد قدیمی» کدام اصل است؟', ['S تک‌مسئولیتی','O باز/بسته','D وارونگی وابستگی'], 1, 'باز/بسته، با تصویر ⚡ چندراهی برق.'),
+      Q('<span class="hint">حدس:</span> الگوی Builder (ساخت مرحله‌به‌مرحلهٔ یک شیء) در کدام خانواده است؟', FAMLAB, 0, 'ایجادگرا؛ چون دربارهٔ ساختن شیء است. صحنهٔ بعد را ببین.')
+    ]),
+    { t:'text', eyebrow:'۲۳ الگو در سه خانواده', h:'تولد · بدن · رفتار', lead:'کتاب مشهور Design Patterns نوشته Gamma، Helm، Johnson و Vlissides در سال ۱۹۹۴، بیست‌وسه الگوی کلاسیک را در سه خانواده دسته‌بندی کرد؛ این دسته‌بندی همچنان مرجع آموزشی مهمی است.', html:FAMS_HTML,
+      check:{ q:'بدون نگاه‌کردن: سه خانواده و هدف هر کدام را بگو.', a:'ایجادگرا (تولد): ساخت اشیا. ساختاری (بدن): ترکیب اجزا در ساختار بزرگ‌تر. رفتاری (رفتار): تعامل و توزیع مسئولیت.' } },
+    { t:'sort', h:'هر الگو مال کدام خانواده است؟', sub:'از روی تصویر و کاری که الگو می‌کند حدس بزن؛ لازم نیست الگو را کامل بشناسی.', labels:FAMLAB, items:[
+      ['🥪 Builder', 0, 'ایجادگرا: شیء را مرحله‌به‌مرحله می‌سازد.'],
+      ['🔌 Adapter', 1, 'ساختاری: دو رابط ناسازگار را به هم وصل می‌کند.'],
+      ['📣 Observer', 2, 'رفتاری: خبر را به مشترکان می‌رساند.'],
+      ['🐑 Prototype', 0, 'ایجادگرا: با کپی‌کردن شیء می‌سازد.'],
+      ['🛎️ Facade', 1, 'ساختاری: یک در ساده جلوی زیرسیستم.'],
+      ['🚦 State', 2, 'رفتاری: رفتار با وضعیت عوض می‌شود.'],
+      ['🌳 Composite', 1, 'ساختاری: ساختار درختی.'],
+      ['🧾 Command', 2, 'رفتاری: درخواست را شیء می‌کند.'],
+      ['👑 Singleton', 0, 'ایجادگرا: ساخت را به یک نمونه محدود می‌کند.']
+    ]},
+    { t:'text', eyebrow:'نمادهای رایج UML', h:'شش خط که باید بشناسی', lead:'نمودار کلاس زبان تصویری الگوهاست. هر الگو در کتاب‌ها با همین نمادها کشیده می‌شود.', html: table(['نماد','نام','معنا'], [
+      [sym('assoc'), 'Association · ارتباط', 'ارتباط میان دو نوع؛ ممکن است نقش و multiplicity (تعداد) داشته باشد.'],
+      [sym('inherit'), 'Inheritance · وراثت', 'رابطهٔ «نوعی از» میان زیرکلاس و کلاس پایه.'],
+      [sym('realize'), 'Realization · پیاده‌سازی', 'یک کلاس یک Interface را پیاده‌سازی می‌کند.'],
+      [sym('depend'), 'Dependency · وابستگی', 'یک جزء برای انجام کار به جزء دیگر وابسته است.'],
+      [sym('compose'), 'Composition · ترکیب', 'رابطهٔ کل-جزء با مالکیت قوی: جزء با کل می‌میرد.'],
+      [sym('aggreg'), 'Aggregation · تجمیع', 'رابطهٔ کل-جزء ضعیف‌تر: جزء می‌تواند جدا زندگی کند.']
+    ]) + '<p class="hint">کلاس یا Interface با یک مستطیل نشان داده می‌شود؛ Interface معمولاً برچسب «interface» دارد.</p>',
+      check:{ q:'خط‌چین با مثلث توخالی، و خط پیوسته با مثلث توخالی: فرقشان؟', a:'خط‌چین = پیاده‌سازی یک Interface (Realization). خط پیوسته = وراثت از یک کلاس (Inheritance).' } },
+    { t:'text', eyebrow:'روش خواندن نمودار', h:'اول نقش‌ها، بعد جهت‌ها', html:'<ol class="steps2"><li><b>نقش‌ها را پیدا کن</b>؛ مثل Context، Strategy، Subject یا Observer.</li><li><b>جهت وابستگی و مسیر فراخوانی را دنبال کن</b>: چه کسی چه کسی را صدا می‌زند؟</li><li>یادت باشد <b>نمودار جایگزین فهم رفتار زمان اجرا نیست</b>.</li></ol>' + STRAT_UML + '<p class="sub">این همان Strategy درس ۱ است: Checkout (Context) یک PaymentMethod نگه می‌دارد (لوزی توخالی)، و CardPayment و WalletPayment آن را پیاده می‌کنند (خط‌چین + مثلث).</p>',
+      check:{ q:'در نمودار بالا، Checkout به کدام کلاس‌ها وابسته است؟', a:'فقط به رابط PaymentMethod. هیچ خطی از Checkout به CardPayment یا WalletPayment نمی‌رود؛ همین باعث می‌شود روش تازه بدون تغییر Checkout اضافه شود.' } },
+    { t:'quiz' } ],
+    quiz:[
+      Q('هدف الگوهای ایجادگرا چیست؟', ['مدیریت ایجاد اشیا و پنهان‌کردن جزئیات ساخت','ترکیب کلاس‌ها برای ساختار بزرگ‌تر','توزیع مسئولیت و جریان درخواست'], 0, '🌱 تولد.'),
+      Q('خط‌چین با مثلث توخالی در UML یعنی…', ['وراثت','Realization: کلاس یک Interface را پیاده‌سازی می‌کند','Composition'], 1, 'خط‌چین = قرارداد، نه کلاس پایه.'),
+      Q('لوزی توپر (Composition) چه می‌گوید؟', ['کل-جزء با مالکیت قوی چرخهٔ عمر','وابستگی موقت','پیاده‌سازی رابط'], 0, 'جزء با کل ساخته می‌شود و با کل از بین می‌رود.'),
+      Q('اولین قدم خواندن نمودار یک الگو چیست؟', ['شمردن کلاس‌ها','پیدا کردن نقش‌ها مثل Subject یا Strategy','حفظ کردن نمودار'], 1, 'بعد جهت وابستگی و مسیر فراخوانی.'),
+      Q('📣 Observer در کدام خانواده است؟', FAMLAB, 2, '💬 رفتار: اشیا چطور با هم حرف می‌زنند.'),
+      Q('<span class="hint">از درس ۲:</span> 🎛️ رابطی بزرگ که کلاس‌ها نیمی از متدهایش را «پشتیبانی نمی‌شود» پر می‌کنند، کدام اصل را می‌شکند؟', ['I تفکیک رابط','S تک‌مسئولیتی','D وارونگی وابستگی'], 0, 'رابط‌های کوچک و هدفمند.')
+    ],
+    card:[['🌱','ایجادگرا = تولد (۵ الگو): ساخت اشیا'],['🦴','ساختاری = بدن (۷ الگو): ترکیب اجزا'],['💬','رفتاری = رفتار (۱۱ الگو): تعامل و مسئولیت'],['UML','خط پیوسته + مثلث = وراثت · خط‌چین + مثلث = پیاده‌سازی رابط · خط‌چین + پیکان = وابستگی · لوزی توپر/توخالی = ترکیب/تجمیع'],['👀','خواندن: نقش‌ها ← جهت وابستگی ← مسیر فراخوانی']] },
+
+  /* ===================== درس ۴ ===================== */
+  { id:4, icon:'🏭', title:'Singleton و Factory Method', next:'درس ۵ · Abstract Factory، Builder و Prototype', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۳:</span> 🥪 Builder در کدام خانواده است؟', FAMLAB, 0, 'ایجادگرا.'),
+      Q('<span class="hint">از درس ۲:</span> 💡 «به انتزاع وابسته شو و وابستگی را از بیرون بگیر» کدام اصل است؟', ['L لیسکوف','D وارونگی وابستگی','O باز/بسته'], 1, 'لامپ به پریز وصل است، نه نیروگاه.'),
+      Q('<span class="hint">حدس:</span> اگر همهٔ کلاس‌ها پنهانی از یک شیء سراسری استفاده کنند، چه چیزی سخت می‌شود؟', ['کامپایل','تست و فهم وابستگی‌ها','نام‌گذاری'], 1, 'جواب در صحنهٔ Singleton.')
+    ]),
+    { t:'text', eyebrow:'الگوهای ایجادگرا', h:'ساختن را از استفاده جدا کن', lead:'الگوهای ایجادگرا فرایند ساخت اشیا را از منطق مصرف‌کننده جدا می‌کنند. انتخاب آن‌ها زمانی ارزشمند است که <span class="key">نحوه ساخت، خانواده محصول یا چرخه عمر شیء</span> بخشی از پیچیدگی طراحی باشد.', html:'<div class="anchor"><span class="img">🌱</span><span>خانوادهٔ تولد<small>اگر new ساده کافی است، الگوی ایجادگرا لازم نیست.</small></span></div>' },
+    { t:'pattern', k:'Singleton' },
+    { t:'pattern', k:'Factory Method' },
+    { t:'sort', h:'کدام مناسب است؟', sub:'برای هر موقعیت انتخاب کن. گاهی جواب درست «هیچ‌کدام» است.', labels:['Singleton','Factory Method','هیچ‌کدام: ساده بساز'], items:[
+      ['یک پیکربندی مشترک که در هر process دقیقاً یک نمونه دارد', 0, 'Singleton، به شرط scope روشن. اغلب DI با scope مشخص بهتر است.'],
+      ['چارچوب گزارش‌گیری روند ثابتی دارد، ولی هر زیرکلاس نوع سند خودش را می‌سازد', 1, 'Factory Method: زیرکلاس محصول را انتخاب می‌کند.'],
+      ['فقط یک بار new User() در یک تابع ساده', 2, 'هیچ‌کدام. Factory برای ساخت ساده و ثابت پیچیدگی غیرضروری است.'],
+      ['افزونه‌ها نوع محصول را از پیکربندی تعیین می‌کنند', 1, 'Factory Method: نوع محصول در زیرکلاس یا پیکربندی تعیین می‌شود.'],
+      ['می‌خواهی سرویس ایمیل را در تست‌ها راحت با نسخهٔ جعلی عوض کنی', 2, 'Singleton این را سخت می‌کند؛ تزریق وابستگی (درس ۲، اصل D) جواب است.']
+    ]},
+    { t:'quiz' } ],
+    quiz:[
+      Q('👑 هدف Singleton چیست؟', ['ساخت سریع اشیا','تضمین یک نمونه در یک محدودهٔ مشخص و نقطهٔ دسترسی مشترک','کپی‌کردن اشیا'], 1, 'و اول باید روشن شود «یک نمونه در چه محدوده‌ای».'),
+      Q('کدام از معایب Singleton نیست؟', ['state سراسری','وابستگی‌های پنهان','افزایش تعداد زیرکلاس‌ها'], 2, 'معایب: state سراسری، وابستگی پنهان، تست سخت، پیچیدگی چندنخی.'),
+      Q('🏭 در Factory Method، مصرف‌کننده به چه چیزی وابسته است؟', ['کلاس concrete محصول','نوع انتزاعی محصول','Singleton'], 1, 'و جزئیات new را نمی‌داند.'),
+      Q('کِی Factory Method پیچیدگی غیرضروری است؟', ['وقتی نوع محصول در زیرکلاس تعیین می‌شود','برای یک ساخت ساده و ثابت','وقتی منطق مصرف‌کننده باید از concrete جدا بماند'], 1, 'اول راه ساده.'),
+      Q('<span class="hint">از درس ۱:</span> '+C_+' روی کارت الگو یعنی…', ['نام','کد','پیامدها: مزایا، هزینه‌ها، محدودیت‌ها'], 2, 'پیامد.'),
+      Q('<span class="hint">از درس ۳:</span> 🛎️ Facade در کدام خانواده است؟', FAMLAB, 1, 'ساختاری.')
+    ],
+    card:[['👑','Singleton: یک نمونه در یک scope مشخص. هزینه: state سراسری، وابستگی پنهان، تست سخت. اغلب DI بهتر است.'],['🏭','Factory Method: متد ساخت انتزاعی؛ زیرکلاس محصول را انتخاب می‌کند. مصرف‌کننده فقط نوع انتزاعی را می‌شناسد.'],['⚠️','برای new ساده و ثابت، هیچ‌کدام.']] },
+
+  /* ===================== درس ۵ ===================== */
+  { id:5, icon:'🎨', title:'Abstract Factory، Builder و Prototype', next:'درس ۶ · Adapter و Facade', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۴:</span> 🏭 در Factory Method چه کسی تصمیم می‌گیرد کدام محصول ساخته شود؟', ['کلاینت','زیرکلاس یا پیاده‌سازی Creator','یک Singleton'], 1, 'هر شعبه محصول خودش را می‌سازد.'),
+      Q('<span class="hint">از درس ۳:</span> لوزی توپر در UML یعنی…', ['Composition: کل-جزء با مالکیت قوی','وراثت','وابستگی'], 0, 'جزء با کل می‌میرد.'),
+      Q('<span class="hint">حدس:</span> <span class="en">new Report("X", true, false, null, PDF, 3)</span> چه مشکلی دارد؟', ['کند است','از روی فراخوانی نمی‌فهمی هر پارامتر چیست','خطای کامپایل دارد'], 1, 'Builder برای همین است.')
+    ]),
+    { t:'pattern', k:'Abstract Factory' },
+    { t:'pattern', k:'Builder' },
+    { t:'pattern', k:'Prototype' },
+    { t:'custom', name:'prototype', eyebrow:'آزمایش: کپی سطحی و عمیق', h:'یک برچسب به کپی اضافه کن. اصل هم عوض می‌شود؟', sub:'هر دو شیء یک لیست «برچسب‌ها» دارند. نوع کپی را عوض کن و دوباره امتحان کن.', check:{ q:'چه وقت کپی سطحی کافی است؟', a:'وقتی همهٔ اجزای شیء تغییرناپذیر (immutable) هستند یا عمداً می‌خواهی مشترک بمانند.' } },
+    { t:'sort', eyebrow:'انتخاب سریع (از جزوه)', h:'کدام الگوی ایجادگرا؟', labels:['Abstract Factory','Builder','Prototype'], items:[
+      ['خانوادهٔ محصولات هماهنگ (دکمه و پنجرهٔ تم تیره)', 0, 'خانوادهٔ محصولات؟ Abstract Factory.'],
+      ['درخواست HTTP با ۱۲ گزینهٔ اختیاری', 1, 'ساخت مرحله‌به‌مرحله؟ Builder.'],
+      ['ساخت ده گزارش از روی یک قالب سنگین بارگذاری‌شده', 2, 'ساخت از روی نمونهٔ موجود؟ Prototype.'],
+      ['ویجت‌های سازگار برای ویندوز و مک', 0, 'دو خانوادهٔ محصول؛ Abstract Factory.'],
+      ['شیء پیکربندی با گزینه‌های زیاد و خوانایی مهم', 1, 'Builder.']
+    ]},
+    { t:'quiz' } ],
+    quiz:[
+      Q('🎨 Abstract Factory چه چیزی را تضمین می‌کند؟', ['فقط یک نمونه','سازگاری محصولات یک خانواده','کپی سریع'], 1, 'انتخاب کارخانه = انتخاب خانواده.'),
+      Q('هزینهٔ اصلی Abstract Factory چیست؟', ['افزودن نوع محصول تازه یعنی تغییر همهٔ کارخانه‌ها','حافظهٔ زیاد','کندی اجرا'], 0, 'افزودن خانوادهٔ تازه آسان است؛ افزودن نوع محصول تازه سخت.'),
+      Q('🥪 Builder چه چیزی را از چه چیزی جدا می‌کند؟', ['ساخت تدریجی را از نمایش نهایی','رابط را از پیاده‌سازی','خواندن را از نوشتن'], 0, 'و فراخوانی را خوانا می‌کند.'),
+      Q('🐑 در کپی سطحی Prototype چه خطری هست؟', ['کندی','اجزای تغییرپذیر بین اصل و کپی مشترک می‌مانند','کپی ناقص'], 1, 'آزمایش صحنهٔ ۵.'),
+      Q('<span class="hint">از درس ۴:</span> 👑 بزرگ‌ترین مشکل Singleton در تست؟', ['حافظه','نمی‌توان به‌جایش نسخهٔ جعلی داد و state نشت می‌کند','کامپایل'], 1, 'DI با scope روشن.'),
+      Q('<span class="hint">از درس ۱:</span> کدام الگو <b>نیست</b>؟', ['Builder','Quicksort','Prototype'], 1, 'الگوریتم است.')
+    ],
+    card:[['🎨','Abstract Factory: یک کارخانه = یک خانوادهٔ محصول سازگار. FM یک محصول؛ AF یک خانواده.'],['🥪','Builder: گام‌به‌گام بساز، در آخر build(). ضد سازندهٔ پرپارامتر.'],['🐑','Prototype: از نمونهٔ موجود clone کن. سطحی یا عمیق؟ حتماً روشن کن.'],['⚡','انتخاب سریع: خانواده؟ AF · مرحله‌ای؟ Builder · از روی نمونه؟ Prototype']] },
+
+  /* ===================== درس ۶ ===================== */
+  { id:6, icon:'🔌', title:'Adapter و Facade', next:'درس ۷ · Decorator و Proxy', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۵:</span> «ساخت از روی نمونهٔ موجود» کدام الگوست؟', ['Builder','Prototype','Abstract Factory'], 1, '🐑'),
+      Q('<span class="hint">از درس ۴:</span> برای new ساده و ثابت، کدام الگوی ایجادگرا لازم است؟', ['Factory Method','هیچ‌کدام','Singleton'], 1, 'اول راه ساده.'),
+      Q('<span class="hint">حدس:</span> شارژر سه‌شاخه و پریز دوشاخه. چه چیزی لازم داری؟', ['یک پریز تازه','یک تبدیل','یک شارژر تازه'], 1, 'همان Adapter.')
+    ]),
+    { t:'text', eyebrow:'الگوهای ساختاری', h:'همکاری اجزا را ساده کن', lead:'الگوهای ساختاری نحوه همکاری اجزا را ساده می‌کنند. <span class="key">Adapter</span> ناسازگاری رابط‌ها را برطرف می‌کند؛ <span class="key">Facade</span> دسترسی به یک زیرسیستم پیچیده را ساده‌تر می‌سازد.', html:'<div class="anchor"><span class="img">🦴</span><span>خانوادهٔ بدن<small>اجزا چطور کنار هم می‌نشینند.</small></span></div>' },
+    { t:'pattern', k:'Adapter' },
+    { t:'pattern', k:'Facade' },
+    { t:'text', eyebrow:'مقایسه (از جزوه)', h:'تبدیل در برابر در ورودی', html: table(['', pn('Adapter')+' 🔌', pn('Facade')+' 🛎️'], [
+      ['کار','رابط ناسازگار را به رابط مورد انتظار تبدیل می‌کند.','یک نقطه دسترسی ساده برای چند جزء ارائه می‌کند.'],
+      ['تمرکز','تمرکز بر سازگاری قراردادهاست.','تمرکز بر ساده‌سازی تعامل با زیرسیستم است.'],
+      ['دامنه','معمولاً یک سرویس یا کلاس را می‌پوشاند.','ممکن است چند سرویس را هماهنگ کند.']
+    ]) },
+    { t:'sort', h:'Adapter یا Facade؟', labels:['Adapter','Facade'], items:[
+      ['سرویس پیامک قدیمی send(phone, text, flag) دارد ولی سامانه notify(user, message) می‌خواهد', 0, 'تبدیل یک رابط به رابط دیگر.'],
+      ['ثبت‌نام کاربر ۶ سرویس را با ترتیب درست صدا می‌زند و می‌خواهی یک متد register() داشته باشی', 1, 'یک در ساده برای چند جزء.'],
+      ['کتابخانهٔ نقشهٔ جدید مختصات را (lng, lat) می‌گیرد ولی کد تو (lat, lng) می‌دهد', 0, 'ترجمهٔ قرارداد.'],
+      ['تیم موبایل فقط یک endpoint برای «خلاصهٔ داشبورد» می‌خواهد، به‌جای ۴ سرویس', 1, 'ساده‌سازی دسترسی.']
+    ]},
+    { t:'quiz' } ],
+    quiz:[
+      Q('🔌 Adapter چه چیزی را متمرکز می‌کند؟', ['منطق کسب‌وکار','مرز تبدیل بین قرارداد داخلی و API خارجی','ساخت اشیا'], 1, 'تا منطق اصلی به قرارداد خارجی گره نخورد.'),
+      Q('Object Adapter در برابر Class Adapter: کدام معمولاً انعطاف بیشتری دارد؟', ['Class Adapter (وراثت)','Object Adapter (ترکیب و delegation)'], 1, 'ترکیب به‌جای وراثت؛ درس ۲.'),
+      Q('🛎️ Facade با پیچیدگی زیرسیستم چه می‌کند؟', ['حذفش می‌کند','دسترسی به آن را ساده می‌کند','دو برابرش می‌کند'], 1, 'پیچیدگی سر جایش است.'),
+      Q('خطای رایج در Facade چیست؟', ['کوچک‌بودن بیش از حد','تبدیل‌شدن به «کلاس همه‌کاره» با منطق کسب‌وکار','استفاده از رابط'], 1, 'مرز مسئولیت‌ها را بازبینی کن.'),
+      Q('<span class="hint">از درس ۵:</span> «درخواست HTTP با ۱۲ گزینهٔ اختیاری» کدام الگو؟', ['Builder','Prototype','Singleton'], 0, '🥪'),
+      Q('<span class="hint">از درس ۲:</span> 👨‍🍳 Facadeی که محاسبه، ذخیره و ایمیل را خودش انجام دهد کدام اصل را می‌شکند؟', ['S تک‌مسئولیتی','L لیسکوف','I تفکیک رابط'], 0, 'باید فقط هماهنگ کند، نه همه‌کار.')
+    ],
+    card:[['🔌','Adapter: رابط ناسازگار ← رابط مورد انتظار. مرز تبدیل را متمرکز کن. ترکیب > وراثت.'],['🛎️','Facade: یک در ساده جلوی زیرسیستم (placeOrder). پیچیدگی را حذف نمی‌کند. کلاس همه‌کاره نشود.'],['↔️','Adapter = سازگاری قرارداد، معمولاً یک سرویس · Facade = ساده‌سازی، معمولاً چند سرویس']] },
+
+  /* ===================== درس ۷ ===================== */
+  { id:7, icon:'🎁', title:'Decorator و Proxy', next:'درس ۸ · Composite، Bridge و Flyweight', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۶:</span> 🛎️ Facade پیچیدگی را…', ['حذف می‌کند','پشت یک در ساده می‌گذارد'], 1, 'دسترسی ساده می‌شود.'),
+      Q('<span class="hint">از درس ۵:</span> 🎨 تم روشن و تیره با دکمه و پنجرهٔ هماهنگ؟', ['Abstract Factory','Builder','Adapter'], 0, 'خانوادهٔ محصول.'),
+      Q('<span class="hint">حدس:</span> می‌خواهی فشرده‌سازی، رمزنگاری و لاگ را به هر ترتیبی روی هم بگذاری. با زیرکلاس برای هر ترکیب چند کلاس لازم است؟', ['۳','حدود ۷ یا بیشتر','۱'], 1, 'هر ترکیب یک کلاس؛ زیاد. Decorator راهش است.')
+    ]),
+    { t:'text', eyebrow:'دو الگوی پوشاننده', h:'هر دو می‌پوشانند؛ هدفشان فرق دارد', lead:'هر دو الگو یک شیء را با شیئی دیگر می‌پوشانند؛ اما هدف آن‌ها متفاوت است. <span class="key">Decorator</span> رفتار را به‌صورت قابل‌ترکیب گسترش می‌دهد، در حالی که <span class="key">Proxy</span> کنترل دسترسی به شیء را بر عهده می‌گیرد.', html:'<div class="chips"><span class="anchor"><span class="img">🎁</span><span>Decorator<small>لایه‌های کادو: چیزی اضافه می‌کند</small></span></span><span class="anchor"><span class="img">🛡️</span><span>Proxy<small>منشی: تصمیم می‌گیرد رد شوی یا نه</small></span></span></div>' },
+    { t:'pattern', k:'Decorator' },
+    { t:'custom', name:'decorator', eyebrow:'آزمایش: لایه‌ها را بچین', h:'لایه‌ها را به ترتیب دلخواه روشن کن', sub:'ترتیب روشن‌کردن = ترتیب پیچیدن. ببین داده از چه مسیری به فایل می‌رسد.' },
+    { t:'pattern', k:'Proxy' },
+    { t:'sort', eyebrow:'پرسش تشخیصی (از جزوه)', h:'Decorator یا Proxy؟', labels:['Decorator','Proxy'], items:[
+      ['می‌خواهم قابلیت‌ها روی هم ترکیب و در زمان اجرا اضافه شوند', 0, 'ترکیب قابلیت؛ Decorator.'],
+      ['می‌خواهم دسترسی، ایجاد، cache یا ارتباط راه دور کنترل شود', 1, 'کنترل؛ Proxy.'],
+      ['فقط مدیرها بتوانند متد deleteUser را صدا بزنند', 1, 'Protection Proxy.'],
+      ['به خروجی گزارش هم واترمارک و هم امضای دیجیتال اضافه شود', 0, 'دو لایهٔ رفتار اضافه.'],
+      ['نتیجهٔ یک API کند ۵ دقیقه نگه داشته شود', 1, 'Caching Proxy.']
+    ]},
+    { t:'quiz' } ],
+    quiz:[
+      Q('🎁 هر Decorator چه رابطی را پیاده‌سازی می‌کند؟', ['رابط تازهٔ خودش','همان رابط مؤلفه','هیچ رابطی'], 1, 'برای همین قابل پیچیدن تودرتوست.'),
+      Q('کدام از هزینه‌های Decorator است؟', ['ترتیب لایه‌ها نتیجه را تغییر می‌دهد و debug سخت‌تر می‌شود','نمی‌شود در زمان اجرا اضافه کرد','زیرکلاس‌های زیاد'], 0, 'زنجیرهٔ اشیا.'),
+      Q('🛡️ Virtual Proxy چه می‌کند؟', ['مجوز می‌دهد','شیء واقعی را تا اولین استفاده نمی‌سازد','پاسخ را cache می‌کند'], 1, 'ایجاد تنبل.'),
+      Q('تفاوت اصلی Decorator و Proxy؟', ['Decorator رفتار اضافه می‌کند؛ Proxy دسترسی را کنترل می‌کند','یکی‌اند','Proxy قابل ترکیب است و Decorator نه'], 0, 'هر دو می‌پوشانند.'),
+      Q('<span class="hint">از درس ۲:</span> ⚡ Decorator کدام اصل را خوب رعایت می‌کند؟', ['O باز/بسته','L لیسکوف'], 0, 'رفتار تازه بدون ویرایش کلاس قبلی.'),
+      Q('<span class="hint">از درس ۶:</span> 🔌 کتابخانه (lng, lat) می‌گیرد و کد تو (lat, lng) می‌دهد؟', ['Adapter','Facade','Proxy'], 0, 'ترجمهٔ قرارداد.')
+    ],
+    card:[['🎁','Decorator: همان رابط + شیء درونی. رفتار را لایه‌لایه در زمان اجرا اضافه کن. ترتیب مهم است.'],['🛡️','Proxy: جانشین با همان رابط برای کنترل. Virtual · Protection · Remote · Caching.'],['❓','ترکیب قابلیت‌ها؟ Decorator · کنترل دسترسی/ایجاد/cache؟ Proxy']] },
+
+  /* ===================== درس ۸ ===================== */
+  { id:8, icon:'🌳', title:'Composite، Bridge و Flyweight', next:'درس ۹ · Strategy و Observer', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۷:</span> 🛡️ «فقط مدیرها بتوانند deleteUser را صدا بزنند»؟', ['Decorator','Protection Proxy','Facade'], 1, 'کنترل دسترسی.'),
+      Q('<span class="hint">از درس ۳:</span> 🌳 Composite در کدام خانواده است؟', FAMLAB, 1, 'ساختاری.'),
+      Q('<span class="hint">حدس:</span> ۳ نوع اعلان × ۳ کانال ارسال، اگر برای هر ترکیب یک زیرکلاس بسازی، چند کلاس؟', ['۶','۹','۳'], 1, '۳ × ۳. Bridge آن را به ۳ + ۳ می‌رساند.')
+    ]),
+    { t:'text', eyebrow:'سه الگو برای ساختارهای پیچیده', h:'درخت · دو محور · اشیای بی‌شمار', lead:'این سه الگو ساختارهای پیچیده را مدیریت می‌کنند: <span class="key">Composite</span> برای سلسله‌مراتب جزء-کل، <span class="key">Bridge</span> برای جداسازی دو بُعد تغییر و <span class="key">Flyweight</span> برای اشتراک وضعیت تکراری.', html:'<div class="chips"><span class="anchor"><span class="img">🌳</span><span>Composite<small>پوشه در پوشه</small></span></span><span class="anchor"><span class="img">🌉</span><span>Bridge<small>کنترل × تلویزیون</small></span></span><span class="anchor"><span class="img">🪶</span><span>Flyweight<small>حروف مشترک</small></span></span></div>' },
+    { t:'pattern', k:'Composite' },
+    { t:'pattern', k:'Bridge' },
+    { t:'custom', name:'bridge', eyebrow:'آزمایش: انفجار زیرکلاس‌ها', h:'نوع و کانال اضافه کن؛ شمارنده‌ها را ببین', sub:'هر مربع یک کلاس است.' },
+    { t:'pattern', k:'Flyweight' },
+    { t:'text', eyebrow:'جمع‌بندی (از جزوه)', h:'ساختار شاخص و کاربرد', html: table(['الگو','ساختار شاخص','نمونهٔ کاربرد'], [
+      [pn('Composite')+' 🌳','گره و برگ با رابط مشترک','فایل و پوشه؛ اجزای رابط کاربری'],
+      [pn('Bridge')+' 🌉','Abstraction + Implementor','کانال و نوع اعلان؛ شکل و موتور رندر'],
+      [pn('Flyweight')+' 🪶','Factory + اشیای اشتراکی','کاراکترهای متن؛ ذرات پرتعداد']
+    ]) },
+    { t:'quiz' } ],
+    quiz:[
+      Q('🌳 در Composite کلاینت با برگ و شاخه چطور رفتار می‌کند؟', ['دو منطق جدا','یکسان، از طریق رابط مشترک','فقط با برگ'], 1, 'size() روی هر دو.'),
+      Q('🌉 Bridge چه چیزی را از چه چیزی جدا می‌کند؟', ['abstraction را از implementation','ساخت را از نمایش','خواندن را از نوشتن'], 0, 'تا هر دو مستقل رشد کنند.'),
+      Q('۵ نوع اعلان و ۴ کانال با Bridge چند کلاس؟', ['۲۰','۹','۵'], 1, '۵ + ۴.'),
+      Q('🪶 در Flyweight چه چیزی مشترک ذخیره می‌شود؟', ['وضعیت بیرونی (مکان)','وضعیت ذاتی (شکل، فونت)','هیچ چیز'], 1, 'بیرونی هنگام استفاده داده می‌شود.'),
+      Q('کِی Flyweight ارزش ندارد؟', ['وقتی نمونه‌ها کم‌اند یا دادهٔ مشترک کم است','وقتی حافظه مهم است'], 0, 'هشدار جزوه.'),
+      Q('<span class="hint">از درس ۷:</span> 🎁 «به خروجی هم واترمارک و هم امضا اضافه شود»؟', ['Decorator','Proxy','Composite'], 0, 'دو لایه رفتار.')
+    ],
+    card:[['🌳','Composite: برگ و شاخه با یک رابط؛ شاخه به فرزندان می‌سپارد. فایل/پوشه.'],['🌉','Bridge: دو محور تغییر را با ترکیب جدا کن. n × m ← n + m.'],['🪶','Flyweight: ذاتی مشترک، بیرونی هنگام استفاده. فقط وقتی نمونه‌ها زیاد و دادهٔ مشترک زیاد است.']] },
+  /* ===================== درس ۹ ===================== */
+  { id:9, icon:'🧭', title:'Strategy و Observer', next:'درس ۱۰ · State، Template Method و Iterator', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۸:</span> 🌉 ۴ نوع × ۵ کانال با Bridge چند کلاس؟', ['۲۰','۹'], 1, 'جمع، نه ضرب.'),
+      Q('<span class="hint">از درس ۱:</span> 🧭 صندوقی که بین کارت، کیف پول و بانک انتخاب می‌کند؟', ['Strategy','Facade','Singleton'], 0, 'از همان اول دوره.'),
+      Q('<span class="hint">حدس:</span> وقتی قیمت یک کالا عوض می‌شود، سبد خرید، صفحهٔ محصول و سرویس ایمیل باید خبردار شوند. کدام الگو؟', ['Observer','Builder','Adapter'], 0, '📣 دنبال‌کردن.')
+    ]),
+    { t:'text', eyebrow:'الگوهای رفتاری', h:'تصمیم و ارتباط میان اشیا', lead:'الگوهای رفتاری مسئولیت تصمیم‌گیری و ارتباط میان اشیا را سامان می‌دهند. <span class="key">Strategy</span> خانواده‌ای از الگوریتم‌ها را قابل‌تعویض می‌کند؛ <span class="key">Observer</span> تغییرات یک موضوع را به مشترکان اطلاع می‌دهد.', html:'<div class="anchor"><span class="img">💬</span><span>خانوادهٔ رفتار<small>اشیا چطور با هم حرف می‌زنند.</small></span></div>' },
+    { t:'pattern', k:'Strategy' },
+    { t:'pattern', k:'Observer' },
+    { t:'custom', name:'observer', eyebrow:'آزمایش: انتشار رویداد', h:'مشترک‌ها را روشن/خاموش کن، بعد منتشر کن', sub:'ناشر (سفارش) هیچ‌کدام از مشترک‌ها را به اسم نمی‌شناسد.', check:{ q:'اگر «پیامک» را به‌عنوان مشترک تازه اضافه کنی، کد OrderSubject تغییر می‌کند؟', a:'نه. مشترک تازه فقط subscribe می‌کند. ناشر فقط فهرست را پیمایش می‌کند.' } },
+    { t:'quiz' } ],
+    quiz:[
+      Q('🧭 Strategy کدام if/switch بزرگ را حذف می‌کند؟', ['شرطی که بین چند الگوریتم هم‌کار انتخاب می‌کند','شرط اعتبارسنجی ورودی','حلقه‌ها'], 0, 'هر شاخه یک کلاس.'),
+      Q('هزینهٔ Strategy؟', ['کلاس‌های بیشتر و نیاز به تصمیم دربارهٔ انتخاب راهبرد','حافظهٔ زیاد','وابستگی پنهان'], 0, 'پیامد.'),
+      Q('📣 رابطهٔ Observer چندبه‌چند است؟', ['یک-به-چند','یک-به-یک','چند-به-چند'], 0, 'یک Subject، چند Observer.'),
+      Q('در سیستم توزیع‌شده، Observer معمولاً به چه شکلی است و چه چیز جداگانه طراحی می‌شود؟', ['event bus یا message broker؛ ترتیب تحویل، تکرار پیام، خطا و idempotency','فقط یک لیست در حافظه','Singleton'], 0, 'نکتهٔ عملیاتی جزوه.'),
+      Q('<span class="hint">از درس ۲:</span> Observer کدام عادت را تقویت می‌کند؟', ['coupling کم بین ناشر و مشترک','وراثت عمیق'], 0, 'جزوه: ارتباط ناشر و مشترک را سست می‌کند.'),
+      Q('<span class="hint">از درس ۸:</span> 🪶 ۱۰۰ هزار درخت در بازی؟', ['Flyweight','Composite','Bridge'], 0, 'شکل مشترک، مکان بیرونی.')
+    ],
+    card:[['🧭','Strategy: هر الگوریتم یک کلاس پشت یک رابط؛ Context یکی را نگه می‌دارد. + حذف switch · − کلاس بیشتر، تصمیم انتخاب.'],['📣','Observer: یک-به-چند؛ subscribe/publish. ناشر جزئیات مشترک را نمی‌داند. توزیع‌شده: broker + idempotency.']] },
+
+  /* ===================== درس ۱۰ ===================== */
+  { id:10, icon:'🚦', title:'State، Template Method و Iterator', next:'درس ۱۱ · Command، Chain و Mediator', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۹:</span> 📣 ناشر Observer از مشترکانش چه می‌داند؟', ['نوع و جزئیاتشان','فقط اینکه رابط Observer را دارند'], 1, 'سست‌پیوند.'),
+      Q('<span class="hint">از درس ۵:</span> 🐑 «ساخت از روی نمونهٔ موجود»؟', ['Prototype','Builder'], 0, ''),
+      Q('<span class="hint">حدس:</span> سفارشی که پرداخت شده، نباید دوباره پرداخت شود ولی می‌تواند ارسال شود. کد پر از if (status == …) شده. کدام الگو؟', ['State','Iterator','Facade'], 0, '🚦')
+    ]),
+    { t:'pattern', k:'State' },
+    { t:'custom', name:'state', eyebrow:'آزمایش: چرخهٔ عمر سفارش', h:'دکمه‌ها را بزن؛ هر وضعیت خودش تصمیم می‌گیرد', sub:'همان دکمه در وضعیت‌های مختلف رفتار متفاوتی دارد.', check:{ q:'وضعیت «برگشت‌خورده» اضافه شود. با الگوی State چه چیزی تغییر می‌کند؟', a:'یک کلاس تازه (ReturnedState) و انتقال به آن از ShippedState. بقیهٔ وضعیت‌ها دست نمی‌خورند.' } },
+    { t:'pattern', k:'Template Method' },
+    { t:'pattern', k:'Iterator' },
+    { t:'sort', eyebrow:'نشانهٔ مسئله (از جزوه)', h:'کدام الگو؟', labels:['State','Template Method','Iterator'], items:[
+      ['شرط‌های متعدد بر اساس وضعیت داخلی', 0, 'رفتار با state داخلی عوض می‌شود.'],
+      ['الگوریتم مشترک با چند مرحلهٔ متغیر', 1, 'گام‌های قابل سفارشی‌سازی یک روند ثابت.'],
+      ['نیاز به پیمایش یکنواخت انواع مجموعه', 2, 'روش پیمایش تغییر می‌کند، نه ساختار مجموعه.'],
+      ['خروجی گزارش به PDF و Excel: سرصفحه و پاورقی ثابت، بدنه متفاوت', 1, 'اسکلت ثابت، گام متغیر.'],
+      ['دکمهٔ پخش در حالت پخش، مکث و توقف رفتار متفاوت دارد', 0, 'State.']
+    ]},
+    { t:'quiz' } ],
+    quiz:[
+      Q('🚦 در State، چه کسی انتقال به وضعیت بعدی را تعیین می‌کند؟', ['کلاینت از بیرون','خود کلاس‌های وضعیت','یک Singleton'], 1, 'فرق با Strategy.'),
+      Q('📝 hook در Template Method چیست؟', ['گامی اختیاری که زیرکلاس می‌تواند بازنویسی کند','یک Observer','یک خطا'], 0, ''),
+      Q('Template Method با چه ابزاری گام‌ها را متغیر می‌کند؟', ['وراثت','ترکیب','کپی'], 0, 'Strategy با ترکیب.'),
+      Q('⏭️ Iterator چه چیزی را پنهان می‌کند؟', ['نمایش داخلی مجموعه','نام مجموعه','تعداد عناصر'], 0, 'فقط next و hasNext.'),
+      Q('<span class="hint">از درس ۹:</span> 🧭 تفاوت Strategy با State؟', ['در Strategy کلاینت انتخاب می‌کند؛ در State خود وضعیت‌ها انتقال را تعیین می‌کنند','یکی‌اند'], 0, ''),
+      Q('<span class="hint">از درس ۶:</span> 🛎️ متد placeOrder که ۵ سرویس را هماهنگ می‌کند؟', ['Facade','Adapter'], 0, '')
+    ],
+    card:[['🚦','State: هر وضعیت یک کلاس با قواعد و انتقال‌های خودش. ضد if تودرتو.'],['📝','Template Method: اسکلت در کلاس پایه، گام‌ها در زیرکلاس، hook اختیاری. (وراثت)'],['⏭️','Iterator: hasNext/next؛ ساختار داخلی پنهان. زبان‌های مدرن دارندش.']] },
+
+  /* ===================== درس ۱۱ ===================== */
+  { id:11, icon:'🧾', title:'Command، Chain of Responsibility و Mediator', next:'درس ۱۲ · Visitor، Memento و Interpreter', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۱۰:</span> 📝 «اسکلت ثابت، گام متغیر»؟', ['Template Method','State','Iterator'], 0, ''),
+      Q('<span class="hint">از درس ۷:</span> 🛡️ کدام نوع Proxy پاسخ را ذخیره می‌کند؟', ['Caching','Virtual','Remote'], 0, ''),
+      Q('<span class="hint">حدس:</span> برای اینکه دکمهٔ «undo» کار کند، هر عملیات باید…', ['یک شیء باشد که بشود ذخیره و معکوسش کرد','سریع باشد','Singleton باشد'], 0, '🧾 Command.')
+    ]),
+    { t:'text', eyebrow:'درخواست‌ها و ارتباطات', h:'فرستنده را از گیرنده جدا کن', lead:'این الگوها درخواست‌ها و ارتباطات پیچیده را از فرستنده جدا می‌کنند و امکان توسعه مسیر اجرای عملیات را می‌دهند.', html:'<div class="chips"><span class="anchor"><span class="img">🧾</span><span>Command<small>برگهٔ سفارش</small></span></span><span class="anchor"><span class="img">☎️</span><span>Chain<small>ارجاع پشتیبانی</small></span></span><span class="anchor"><span class="img">🗼</span><span>Mediator<small>برج مراقبت</small></span></span></div>' },
+    { t:'pattern', k:'Command' },
+    { t:'custom', name:'command', eyebrow:'آزمایش: تاریخچه و undo', h:'فرمان بده، بعد undo کن', sub:'هر دکمه یک شیء Command می‌سازد و در تاریخچه می‌گذارد.' },
+    { t:'pattern', k:'Chain of Responsibility' },
+    { t:'custom', name:'chain', eyebrow:'آزمایش: مسیر یک تیکت', h:'یک تیکت بفرست و ببین کجا رسیدگی می‌شود', sub:'هر سطح فقط سطح بعدی را می‌شناسد.' },
+    { t:'pattern', k:'Mediator' },
+    { t:'text', eyebrow:'تمایز مهم (از جزوه)', h:'سه الگو، سه پرسش کلیدی', html: table(['الگو','مناسب برای','پرسش کلیدی'], [
+      [pn('Command')+' 🧾','بسته‌بندی عملیات به‌عنوان شیء','آیا باید درخواست را ذخیره، صف‌بندی یا معکوس کنم؟'],
+      [pn('Chain of Responsibility')+' ☎️','انتخاب handler در مسیر مرحله‌ای','کدام جزء مسئول رسیدگی به این درخواست است؟'],
+      [pn('Mediator')+' 🗼','کاهش ارتباط مستقیم اجزا','چگونه تعامل چند شیء را هماهنگ کنم؟']
+    ]) + '<p class="sub">Command دربارهٔ <b>نمایش</b> یک درخواست است؛ Chain دربارهٔ <b>عبور</b> درخواست میان handlerها؛ Mediator دربارهٔ <b>هماهنگ‌کردن</b> تعامل چند همکار.</p>' },
+    { t:'quiz' } ],
+    quiz:[
+      Q('🧾 Command چه امکان‌هایی می‌دهد؟', ['صف‌بندی، تاریخچه، زمان‌بندی، retry و undo','فقط سرعت','کپی اشیا'], 0, ''),
+      Q('☎️ در Chain چه چیزی باید حتماً شفاف باشد؟', ['رفتار در صورت عدم رسیدگی و ترتیب زنجیره','رنگ handlerها','تعداد کلاس‌ها'], 0, ''),
+      Q('middlewareهای HTTP نمونهٔ کدام الگو هستند؟', ['Chain of Responsibility','Mediator','Command'], 0, ''),
+      Q('🗼 ۶ جزء که همه با هم حرف می‌زنند تا ۱۵ ارتباط دارند. با Mediator؟', ['۶','۱۵','۳۰'], 0, 'هر جزء فقط با میانجی.'),
+      Q('<span class="hint">از درس ۱۰:</span> 🚦 دکمهٔ پخش با رفتار متفاوت در حالت مکث و پخش؟', ['State','Command'], 0, ''),
+      Q('<span class="hint">از درس ۳:</span> خط‌چین با پیکان باز در UML؟', ['Dependency','Inheritance','Composition'], 0, 'وابستگی.')
+    ],
+    card:[['🧾','Command: درخواست = شیء. صف، تاریخچه، retry، undo. دکمه فقط execute می‌زند.'],['☎️','Chain: درخواست از handlerها می‌گذرد تا یکی رسیدگی کند. ترتیب و «اگر کسی نکرد» را تعریف کن.'],['🗼','Mediator: همه با میانجی حرف می‌زنند، نه با هم. مراقب کلاس همه‌کاره باش.']] },
+
+  /* ===================== درس ۱۲ ===================== */
+  { id:12, icon:'💾', title:'Visitor، Memento و Interpreter', next:'درس ۱۳ · الگوهای معماری', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۱۱:</span> ☎️ سطح ۱ تا ۳ پشتیبانی؟', ['Chain of Responsibility','Mediator'], 0, ''),
+      Q('<span class="hint">از درس ۸:</span> 🌳 «اندازهٔ پوشه = جمع اندازهٔ فرزندان»؟', ['Composite','Flyweight'], 0, ''),
+      Q('<span class="hint">حدس:</span> ذخیرهٔ بازی قبل از غول آخر، به کدام نیاز شبیه است؟', ['undo: ثبت و بازیابی وضعیت','پیمایش مجموعه','ساخت اشیا'], 0, '💾 Memento.')
+    ]),
+    { t:'text', eyebrow:'سه الگوی باقی‌ماندهٔ GoF', h:'ابزارهای تخصصی‌تر', lead:'سه الگوی باقی‌مانده GoF ابزارهایی تخصصی‌تر برای افزودن عملیات، ذخیره وضعیت، تفسیر زبان کوچک و مدیریت ساختارهای مرکب ارائه می‌کنند. در شمارش GoF، Visitor، Memento و Interpreter همراه ۲۰ الگوی صفحات قبل، مجموع ۲۳ الگوی کلاسیک را کامل می‌کنند.', html:'<div class="chips"><span class="anchor"><span class="img">🕵️</span><span>Visitor<small>بازرس</small></span></span><span class="anchor"><span class="img">💾</span><span>Memento<small>ذخیرهٔ بازی</small></span></span><span class="anchor"><span class="img">🗣️</span><span>Interpreter<small>زبان کوچک</small></span></span></div>' },
+    { t:'pattern', k:'Visitor' },
+    { t:'pattern', k:'Memento' },
+    { t:'custom', name:'memento', eyebrow:'آزمایش: undo با snapshot', h:'بنویس، ذخیره کن، برگرد', sub:'تاریخچه حداکثر ۵ snapshot نگه می‌دارد (سیاست حذف قدیمی‌ها).' },
+    { t:'pattern', k:'Interpreter' },
+    { t:'sort', eyebrow:'نقشهٔ ذهنی کل الگوهای رفتاری', h:'نیاز ← الگو', sub:'هر ۱۱ الگوی رفتاری درهم. این تمرین درهم‌آمیخته عمداً سخت‌تر است.', labels:['Visitor','Memento','Interpreter','Strategy','Observer','State','Command','Chain','Mediator','Template Method','Iterator'], items:[
+      ['افزودن عملیات جدید به ساختار ثابتی از انواع عناصر', 0, 'Visitor 🕵️'],
+      ['بازگشت به وضعیت پیشین بدون افشای جزئیات', 1, 'Memento 💾'],
+      ['تفسیر یک grammar کوچک و محدود', 2, 'Interpreter 🗣️'],
+      ['انتخاب الگوریتم در زمان اجرا', 3, 'Strategy 🧭'],
+      ['اطلاع‌رسانی به مشترکان', 4, 'Observer 📣'],
+      ['رفتار وابسته به وضعیت', 5, 'State 🚦'],
+      ['صف‌بندی و retry درخواست‌ها', 6, 'Command 🧾'],
+      ['عبور درخواست از چند مرحلهٔ فیلتر', 7, 'Chain ☎️'],
+      ['هماهنگی چند کنترل فرم', 8, 'Mediator 🗼'],
+      ['روند import ثابت با گام‌های مخصوص CSV و JSON', 9, 'Template Method 📝'],
+      ['پیمایش یکنواخت درخت و لیست', 10, 'Iterator ⏭️']
+    ]},
+    { t:'quiz' } ],
+    quiz:[
+      Q('🕵️ نقطه‌ضعف Visitor؟', ['افزودن نوع عنصر تازه سخت است','افزودن عملیات تازه سخت است'], 0, 'همهٔ Visitorها باید توسعه یابند.'),
+      Q('💾 در Memento، نگهدارندهٔ تاریخچه داخل snapshot را می‌بیند؟', ['بله','نه؛ کپسوله‌سازی حفظ می‌شود'], 1, ''),
+      Q('Memento چه هزینه‌هایی دارد؟', ['حافظه، عمق تاریخچه و سیاست حذف snapshotهای قدیمی','هیچ'], 0, ''),
+      Q('🗣️ برای یک زبان پیچیده، به‌جای Interpreter دستی چه پیشنهاد می‌شود؟', ['parser generator یا ابزار تخصصی','Singleton','Facade'], 0, ''),
+      Q('<span class="hint">از درس ۱۱:</span> 🧾 Command و 💾 Memento هر دو برای undo؛ فرقشان؟', ['Command عملیات را معکوس می‌کند؛ Memento کل وضعیت قبلی را برمی‌گرداند','یکی‌اند'], 0, ''),
+      Q('<span class="hint">از درس ۳:</span> GoF چند الگو دارد؟', ['۱۱','۲۳','۴۰'], 1, '۵ + ۷ + ۱۱.')
+    ],
+    card:[['🕵️','Visitor: accept(visitor)؛ عملیات تازه آسان، نوع عنصر تازه سخت.'],['💾','Memento: snapshot بدون افشای داخل. حافظه و عمق تاریخچه را مدیریت کن.'],['🗣️','Interpreter: هر قاعدهٔ grammar یک کلاس. برای زبان پیچیده ابزار تخصصی.'],['✅','۲۳ الگو کامل شد: ۵ ایجادگرا + ۷ ساختاری + ۱۱ رفتاری.']] },
+
+  /* ===================== درس ۱۳ ===================== */
+  { id:13, icon:'🏛️', title:'الگوهای معماری و سازمانی', next:'درس ۱۴ · انتخاب الگو و ضدالگوها', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۱۲:</span> 🕵️ «عملیات تازه روی انواع ثابت عناصر»؟', ['Visitor','Iterator'], 0, ''),
+      Q('<span class="hint">از درس ۲:</span> 💡 تزریق وابستگی کدام اصل را محقق می‌کند؟', ['D وارونگی وابستگی','S تک‌مسئولیتی'], 0, ''),
+      Q('<span class="hint">حدس:</span> حساب بانکی هر تراکنش را ثبت می‌کند و موجودی از جمع آن‌ها به دست می‌آید. اسم این ایده؟', ['Event Sourcing','Singleton','Facade'], 0, '📒')
+    ]),
+    { t:'text', eyebrow:'فراتر از GoF', h:'از کلاس تا کل سیستم', lead:'الگوهای GoF بیشتر در سطح کلاس و همکاری اشیا مطرح می‌شوند؛ در پروژه‌های بزرگ‌تر، <span class="key">الگوهای معماری و الگوهای سازمانی</span> برای سازمان‌دهی لایه‌ها، داده و جریان درخواست به‌کار می‌روند.', html:'<div class="cards3">' + [
+      ['🎂','Layered Architecture','تقسیم سیستم به لایه‌های مسئولیت‌محور، مثل لایه‌های کیک.','Presentation، Application، Domain، Infrastructure'],
+      ['📺','MVC','تفکیک Model (داده)، View (نمایش) و Controller (کنترل).','برنامه‌های وب و رابط کاربری'],
+      ['📚','Repository','دسترسی به داده پشت یک قرارداد؛ مثل کتابدار: کتاب را می‌خواهی، نه آدرس قفسه.','جدا کردن منطق دامنه از ORM یا دیتابیس'],
+      ['🛒','Unit of Work','ردیابی تغییرات و یک commit هماهنگ؛ مثل سبد خرید که آخر کار یکجا پرداخت می‌شود.','تراکنش چند عملیات مرتبط'],
+      ['💉','Dependency Injection','تأمین وابستگی از بیرون به‌جای ساخت مستقیم.','سرویس‌ها، repositoryها و clientها'],
+      ['🪟','CQRS','مدل خواندن از مدل نوشتن جدا؛ مثل باجهٔ واریز و باجهٔ استعلام بانک.','سیستم‌های پرترافیک و مدل دامنهٔ پیچیده'],
+      ['📒','Event Sourcing','ذخیرهٔ رخدادهای تغییر وضعیت به‌جای فقط آخرین وضعیت؛ مثل دفتر حساب.','ردیابی تاریخی و بازسازی state']
+    ].map(([i,n,d,u]) => '<div class="c3"><h3><span class="img">' + i + '</span>' + ax(n) + '</h3><p>' + d + '</p><span class="use">کاربرد: ' + u + '</span></div>').join('') + '</div>',
+      check:{ q:'CQRS و Event Sourcing را با تصویرشان به یاد بیاور.', a:'🪟 CQRS: باجهٔ جدا برای واریز (نوشتن) و استعلام (خواندن). 📒 Event Sourcing: دفتر حساب که همهٔ تراکنش‌ها را نگه می‌دارد و موجودی از آن حساب می‌شود.' } },
+    { t:'text', eyebrow:'تزریق وابستگی در عمل', h:'وابستگی را بگیر، نساز', lead:'تزریق وابستگی یک الگوی پیاده‌سازی مهم برای تحقق Dependency Inversion است. شیء به‌جای ساختن وابستگی، آن را از سازنده یا setter دریافت می‌کند. تزریق سازنده معمولاً وابستگی‌های ضروری را آشکار می‌سازد و تست را ساده می‌کند.', html: codeHTML(['class OrderService:','    gateway: PaymentGateway','    constructor(gateway: PaymentGateway):','        this.gateway = gateway']) + '<p class="sub">چارچوب‌هایی مثل Spring یا .NET DI container ساخت و اتصال وابستگی‌ها را مدیریت می‌کنند؛ با این حال container نباید بهانه‌ای برای پنهان‌کردن گراف وابستگی‌های نامفهوم باشد.</p>' },
+    { t:'sort', eyebrow:'قاعدهٔ مرزبندی (از جزوه)', h:'الگو را در سطح مناسب انتخاب کن', sub:'مشکل ساخت یک شیء با Factory حل می‌شود؛ مشکل سازمان‌دهی کل سیستم ممکن است به معماری لایه‌ای یا ماژول‌بندی نیاز داشته باشد.', labels:['سطح کلاس (GoF)','سطح سیستم (معماری)'], items:[
+      ['ساخت یک شیء با چند نوع ممکن', 0, 'Factory.'],
+      ['جدا کردن کد رابط کاربری، منطق دامنه و دسترسی به دیتابیس در کل پروژه', 1, 'معماری لایه‌ای.'],
+      ['گزارش‌گیری سنگین که سرعت ثبت سفارش را پایین آورده', 1, 'CQRS.'],
+      ['افزودن رمزنگاری به یک منبع داده', 0, 'Decorator.'],
+      ['نیاز به تاریخچهٔ کامل همهٔ تغییرات حساب‌ها', 1, 'Event Sourcing.']
+    ]},
+    { t:'quiz' } ],
+    quiz:[
+      Q('📚 Repository چه چیزی را جدا می‌کند؟', ['منطق دامنه از ORM یا دیتابیس','View از Controller'], 0, ''),
+      Q('🛒 Unit of Work چه می‌کند؟', ['تغییرات را ردیابی و یکجا commit می‌کند','لاگ می‌نویسد'], 0, ''),
+      Q('🪟 CQRS؟', ['تفکیک مدل خواندن از مدل نوشتن','یک الگوی ایجادگرا'], 0, ''),
+      Q('خطر DI container چیست؟', ['پنهان‌کردن گراف وابستگی‌های نامفهوم','کندی'], 0, ''),
+      Q('<span class="hint">از درس ۴:</span> 👑 در بسیاری از پروژه‌ها چه چیزی بهتر از Singleton دستی است؟', ['DI با scope روشن','Prototype'], 0, ''),
+      Q('<span class="hint">از درس ۱۲:</span> 💾 undo در ویرایشگر متن؟', ['Memento','Visitor'], 0, '')
+    ],
+    card:[['🎂','Layers · 📺 MVC · 📚 Repository · 🛒 Unit of Work'],['💉','DI: وابستگی از سازنده؛ تست ساده. container گراف را پنهان نکند.'],['🪟','CQRS: خواندن ≠ نوشتن · 📒 Event Sourcing: رخدادها، نه فقط آخرین وضعیت'],['📏','الگو را در سطح درست انتخاب کن: کلاس یا سیستم.']] },
+
+  /* ===================== درس ۱۴ ===================== */
+  { id:14, icon:'🧲', title:'انتخاب الگو و ضدالگوها', next:'درس ۱۵ · مطالعهٔ موردی فروشگاه', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۱۳:</span> 📒 «ذخیرهٔ رخدادها به‌جای آخرین وضعیت»؟', ['Event Sourcing','CQRS'], 0, ''),
+      Q('<span class="hint">از درس ۱:</span> ترتیب مطالعهٔ هر الگو؟', ['کلاس‌ها ← نیرو ← پیامد','نیرو ← ساختار ← پیامد'], 1, '🧲 اول نیرو.'),
+      Q('<span class="hint">حدس:</span> کلاسی با ۴۰ متد که هم سفارش، هم کاربر و هم گزارش را مدیریت می‌کند، اسمش چیست؟', ['God Object','Facade خوب','Singleton'], 0, '🐘')
+    ]),
+    { t:'text', eyebrow:'فرایند پیشنهادی انتخاب (از جزوه)', h:'اول نیرو، بعد اسم الگو', lead:'انتخاب الگو باید از مشاهده یک <span class="key">نیروی محرک واقعی</span> در طراحی آغاز شود، نه از علاقه به نام یک الگو یا تلاش برای نمایش پیچیدگی فنی.', html:'<ol class="steps2"><li>مسئله را <b>بدون نام‌بردن از الگو</b> تعریف کنید: چه چیزی تغییر می‌کند یا دشوار شده است؟</li><li><b>محور تغییر</b> را پیدا کنید: الگوریتم، ایجاد شیء، رابط ناسازگار، چرخه عمر، ارتباط اجزا یا ساختار داده؟</li><li><b>چند راه‌حل ساده</b> را مقایسه کنید؛ گاهی یک تابع یا کلاس کوچک کافی است.</li><li><b>نقش‌ها و مسئولیت‌ها</b> را ترسیم کنید و ببینید کدام الگو با قیود موجود سازگار است.</li><li><b>هزینه‌ها</b> را بسنجید: تعداد کلاس‌ها، indirection، مصرف حافظه، latency، دشواری debugging و نگهداری.</li><li>الگو را در <b>کوچک‌ترین محدوده لازم</b> پیاده‌سازی و با تست و بازخورد بازبینی کنید.</li></ol>' },
+    { t:'custom', name:'axis', eyebrow:'ابزار: محور تغییر ← الگوهای نامزد', h:'چه چیزی در طراحی تو تغییر می‌کند؟', sub:'یک محور را انتخاب کن. یادت باشد گام ۳: اول راه ساده را مقایسه کن.' },
+    { t:'text', eyebrow:'ضدالگوها: نشانه‌های استفادهٔ نامناسب', h:'وقتی الگو خودش مشکل می‌شود', html: table(['نشانه','چرا خطرناک است؟','اصلاح پیشنهادی'], [
+      ['🏗️ Overengineering','ساختار پیش از وجود نیاز واقعی پیچیده می‌شود.','راه‌حل ساده را انتخاب کنید و در زمان نیاز refactor کنید.'],
+      ['🐘 God Object','یک کلاس مسئولیت‌های فراوان و نامرتبط دارد.','تفکیک مسئولیت بر اساس تغییر و cohesion.'],
+      ['👑👑 Singleton همه‌جا','وابستگی‌ها پنهان و تست سخت می‌شود.','تزریق وابستگی و scope روشن.'],
+      ['🏭 Factory غیرضروری','لایه اضافی بدون تنوع واقعی در ساخت ایجاد می‌شود.','ساخت مستقیم تا زمان ظهور نیاز متغیر.'],
+      ['🌲 Inheritance عمیق','تغییر پایه اثر پیش‌بینی‌ناپذیر بر زیرکلاس‌ها دارد.','ترکیب و delegation را بررسی کنید.']
+    ]) + '<p class="lead"><b>معیار موفقیت:</b> الگو زمانی خوب استفاده شده که فهم و تغییر سیستم را <span class="key">آسان‌تر</span> کند؛ نه صرفاً تعداد abstractionها یا کلاس‌ها را افزایش دهد.</p>' },
+    { t:'sort', h:'کدام ضدالگو؟', labels:['Overengineering','God Object','Singleton همه‌جا','Factory غیرضروری','وراثت عمیق'], items:[
+      ['برای یک اسکریپت ۵۰ خطی، ۸ رابط و ۳ کارخانه ساخته‌ای', 0, '🏗️'],
+      ['کلاس AppManager با ۶۰ متد: کاربر، سفارش، ایمیل، گزارش', 1, '🐘'],
+      ['Logger، Config، Db، Cache، Mailer همه getInstance دارند و تست‌ها به هم نشت می‌کنند', 2, '👑👑'],
+      ['UserFactory که فقط return new User() دارد و هیچ نوع دیگری در کار نیست', 3, '🏭'],
+      ['Animal ← Mammal ← Dog ← SmallDog ← ToyPoodle ← RobotToyPoodle', 4, '🌲']
+    ]},
+    { t:'quiz' } ],
+    quiz:[
+      Q('گام اول انتخاب الگو؟', ['گفتن نام الگو','تعریف مسئله بدون نام الگو'], 1, ''),
+      Q('«محور تغییر: ارتباط اجزا» کدام الگوها را نامزد می‌کند؟', ['Observer، Mediator، Chain، Command','Builder، Prototype'], 0, ''),
+      Q('اصلاح God Object؟', ['تفکیک مسئولیت بر اساس تغییر و cohesion','افزودن Singleton'], 0, 'اصل S.'),
+      Q('معیار موفقیت استفاده از الگو؟', ['کلاس‌های بیشتر','فهم و تغییر آسان‌تر سیستم'], 1, ''),
+      Q('<span class="hint">از درس ۸:</span> 🌉 وراثتی که به n × m کلاس می‌رسد؟', ['Bridge','Flyweight'], 0, ''),
+      Q('<span class="hint">از درس ۲:</span> 🧱 اصلاح وراثت عمیق؟', ['ترکیب و delegation','وراثت بیشتر'], 0, '')
+    ],
+    card:[['🧲','۶ گام: مسئله بی‌نام ← محور تغییر ← راه ساده ← نقش‌ها ← هزینه ← کوچک‌ترین محدوده + تست'],['🚫','🏗️ Overengineering · 🐘 God Object · 👑👑 Singleton همه‌جا · 🏭 Factory بی‌دلیل · 🌲 وراثت عمیق'],['✅','الگو خوب = فهم و تغییر آسان‌تر']] },
+
+  /* ===================== درس ۱۵ ===================== */
+  { id:15, icon:'🛒', title:'مطالعهٔ موردی: سفارش و پرداخت در فروشگاه', next:'درس ۱۶ · پیاده‌سازی، آزمون و مرور نهایی', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۱۴:</span> 🐘 کلاس با ۶۰ متد نامرتبط؟', ['God Object','Facade'], 0, ''),
+      Q('<span class="hint">از درس ۶:</span> 🔌 بانک قدیمی با API متفاوت؟', ['Adapter','Bridge'], 0, ''),
+      Q('<span class="hint">حدس:</span> یک ماژول فروشگاه چند الگو لازم دارد؟', ['یکی کافی است','چند الگو، هر کدام برای یک نیاز'], 1, 'جزوه شش نیاز را با شش الگو جواب می‌دهد.')
+    ]),
+    { t:'text', eyebrow:'سناریو (از جزوه)', h:'شش نیاز، شش الگو', lead:'سناریو: فروشگاه باید روش‌های پرداخت متفاوت، محاسبه هزینه ارسال، وضعیت‌های سفارش، اطلاع‌رسانی و اتصال به درگاه بانکی قدیمی را پشتیبانی کند. هدف، ساخت یک طراحی قابل توسعه و آزمون‌پذیر است.', html: table(['نیاز','الگو','نقش در طراحی'], [
+      ['چند روش پرداخت قابل تعویض', pn('Strategy'), 'PaymentStrategy برای کارت، کیف پول یا پرداخت در محل'],
+      ['API متفاوت بانک قدیمی', pn('Adapter'), 'تبدیل قرارداد داخلی PaymentGateway به API بانک'],
+      ['مراحل هماهنگ ثبت سفارش', pn('Facade') + ' / Application Service', 'متد placeOrder برای هماهنگی عملیات'],
+      ['تغییر رفتار بر اساس وضعیت سفارش', pn('State'), 'قواعد پرداخت، ارسال و لغو برای هر وضعیت'],
+      ['اطلاع به مشتری و انبار', pn('Observer') + ' / Event', 'انتشار OrderPaid یا OrderShipped'],
+      ['ساخت شیء سفارش با گزینه‌های متعدد', pn('Builder'), 'ساخت درخواست یا گزارش پیچیده، در صورت نیاز']
+    ]) },
+    { t:'custom', name:'case', eyebrow:'سناریوی اجرای ثبت سفارش', h:'گام‌به‌گام دنبال کن', sub:'هر گام، اجزای درگیر در نمودار پررنگ می‌شوند.' },
+    { t:'text', eyebrow:'ملاحظهٔ تراکنشی', h:'یک الگو همه چیز را حل نمی‌کند', lead:'در سامانه واقعی، موفقیت پرداخت و ثبت سفارش باید با طراحی <span class="key">تراکنش توزیع‌شده</span>، <span class="key">idempotency</span>، سازوکار جبران (Saga/Compensation) و مدیریت خطای پیام‌ها بررسی شود؛ یک الگوی GoF به‌تنهایی این مسائل را حل نمی‌کند.', html:'<div class="anchor"><span class="img">⚠️</span><span>پرداخت موفق، ولی ثبت سفارش شکست خورد؟<small>اینجا Saga و جبران لازم است، نه یک الگوی کلاسی.</small></span></div>',
+      check:{ q:'اگر پیام OrderPaid دو بار برسد، انبار چه کند؟', a:'باید idempotent باشد: با شناسهٔ رویداد بفهمد قبلاً پردازش شده و دوباره کالا کم نکند.' } },
+    { t:'quiz' } ],
+    quiz:[
+      Q('در این طراحی، چه کسی با LegacyBankApi حرف می‌زند؟', ['OrderApplicationService','فقط BankAdapter'], 1, ''),
+      Q('بعد از پرداخت موفق وضعیت سفارش به چه تغییر می‌کند و کدام الگو مسئول است؟', ['Paid؛ State','Shipped؛ Observer'], 0, ''),
+      Q('چه کسی به مشتری و انبار خبر می‌دهد؟', ['EventPublisher با Observerها','Facade مستقیماً'], 0, ''),
+      Q('کدام مسئله را یک الگوی GoF به‌تنهایی حل نمی‌کند؟', ['تراکنش توزیع‌شده و idempotency','انتخاب روش پرداخت'], 0, ''),
+      Q('<span class="hint">از درس ۱۳:</span> 🛒 «یک commit هماهنگ برای چند عملیات مرتبط»؟', ['Unit of Work','Repository'], 0, ''),
+      Q('<span class="hint">از درس ۱۰:</span> 🚦 «پرداخت تکراری رد شود» در کدام کلاس پیاده می‌شود؟', ['PaidState','Checkout'], 0, '')
+    ],
+    card:[['🛒','نیاز ← الگو: پرداخت ← Strategy · بانک قدیمی ← Adapter · placeOrder ← Facade · وضعیت ← State · اعلان ← Observer · ساخت پیچیده ← Builder'],['➡️','اجرا: درخواست ← اعتبارسنجی ← پرداخت از راه Adapter ← Paid ← انتشار OrderPaid'],['⚠️','تراکنش توزیع‌شده، idempotency و Saga جداگانه.']] },
+
+  /* ===================== درس ۱۶ ===================== */
+  { id:16, icon:'✅', title:'پیاده‌سازی، آزمون و مرور نهایی', next:'', scenes:[
+    warmUp([
+      Q('<span class="hint">از درس ۱۵:</span> بانک قدیمی در مطالعهٔ موردی با کدام الگو وصل شد؟', ['Adapter','Proxy'], 0, ''),
+      Q('<span class="hint">از درس ۳:</span> سه خانواده؟', ['تولد، بدن، رفتار','کلاس، شیء، رابط'], 0, ''),
+      Q('<span class="hint">حدس:</span> اسم کلاس‌ها بهتر است چه چیزی را بگویند؟', ['نام الگو (PaymentStrategyFactoryImpl)','مفهوم دامنه (DiscountPolicy)'], 1, 'قانون کدنویسی جزوه.')
+    ]),
+    { t:'text', eyebrow:'از ایدهٔ الگو تا کد قابل نگهداری', h:'نام‌ها، قراردادها، مرزها', lead:'پیاده‌سازی یک الگو زمانی موفق است که نام‌ها، قراردادها و مرزهای مسئولیت روشن باشند. مثال‌های این صفحه بر اصول مشترک میان بیشتر زبان‌های شیءگرا تمرکز دارند.', html:
+      '<div class="xgrid"><div class="xcard"><h3><span class="img">🧭</span>Strategy با Python</h3>' + codeHTML(['class DiscountPolicy(Protocol):','    def apply(self, total) -> float: ...','class PercentDiscount:','    def __init__(self, percent):','        if not 0 <= percent <= 100: raise ValueError','        self.percent = percent','    def apply(self, total):','        return total * (1 - self.percent / 100)','class Checkout:','    def __init__(self, policy: DiscountPolicy): ...','    def final_total(self, total):','        return self.policy.apply(total)']) + '<p>نکته: Checkout به قرارداد DiscountPolicy وابسته است، نه به کلاس PercentDiscount. بنابراین سیاست‌های جدید را می‌توان بدون تغییر منطق Checkout افزود. در نسخه production باید نوع پول، rounding، currency و اعتبارسنجی دامنه نیز دقیق طراحی شود.</p></div>' +
+      '<div class="xcard"><h3><span class="img">📣</span>Observer ساده با Python</h3>' + codeHTML(['class EventBus:','    def subscribe(self, event_type, handler):','        self._handlers.setdefault(event_type, []).append(handler)','    def publish(self, event):','        for h in self._handlers.get(type(event), []):','            h(event)']) + '<p>در پیاده‌سازی واقعی باید unsubscribe، مدیریت خطای handler، جلوگیری از نشت حافظه، thread-safety، ترتیب اجرا و سیاست retry تعریف شوند. در سامانه‌های توزیع‌شده نیز event bus درون‌حافظه‌ای جایگزین broker پایدار نیست.</p></div></div>' +
+      '<div class="anchor"><span class="img">🏷️</span><span>قانون کدنویسی<small>نام الگو را در همه نام کلاس‌ها تکرار نکنید. نام‌ها باید مفهوم دامنه را بیان کنند؛ ساختار کد به‌تنهایی نشان می‌دهد کدام الگو به‌کار رفته است.</small></span></div>' },
+    { t:'text', eyebrow:'راهنمای آزمون بر اساس الگو (از جزوه)', h:'هر الگو چه تستی لازم دارد؟', lead:'الگوهای طراحی به‌خودی‌خود کیفیت را تضمین نمی‌کنند. کیفیت باید از طریق تست واحد، تست یکپارچگی، بازبینی طراحی و سنجش پیامدهای واقعی ارزیابی شود.', html: table(['الگو','موضوع آزمون کلیدی'], [
+      [pn('Strategy'),'یکسان‌بودن قرارداد راهبردها و صحت انتخاب هر الگوریتم'],
+      [pn('Factory Method')+' / '+pn('Abstract Factory'),'تولید نوع یا خانوادهٔ محصول سازگار و قابل جایگزینی'],
+      [pn('Decorator'),'حفظ قرارداد مؤلفه و صحت ترتیب ترکیب تزئین‌کننده‌ها'],
+      [pn('Observer'),'ثبت و لغو اشتراک، تعداد اعلان‌ها و رفتار در صورت خطای ناظر'],
+      [pn('State'),'انتقال‌های مجاز و رد انتقال‌های نامعتبر'],
+      [pn('Adapter'),'تبدیل صحیح داده، واحدها، خطاها و قرارداد سرویس خارجی'],
+      [pn('Singleton'),'محدودهٔ نمونه و رفتار ایمن در اجرای هم‌زمان، در صورت نیاز']
+    ]) },
+    { t:'custom', name:'checklist', eyebrow:'چک‌لیست بازبینی طراحی', h:'روی طراحی خودت امتحانش کن', sub:'یک طراحی از پروژهٔ خودت را در نظر بگیر و تیک بزن.' },
+    { t:'text', eyebrow:'تمرین‌های پیشنهادی جزوه', h:'پنج تمرین برای دست‌به‌کار شدن', html:'<ol class="steps2"><li>برای یک سامانهٔ اعلان، دو کانال Email و SMS و سه سطح اولویت طراحی کن. کدام الگوها مناسب‌اند؟ <span class="hint">(راهنما: درس ۸)</span></li><li>یک کد دارای switch بزرگ برای محاسبهٔ هزینهٔ ارسال را به Strategy بازطراحی کن. <span class="hint">(درس ۲ و ۹)</span></li><li>تفاوت Decorator و Proxy را با یک مثال مستقل توضیح بده. <span class="hint">(درس ۷)</span></li><li>برای سفارش اینترنتی نمودار حالت و انتقال‌های مجاز را رسم کن. <span class="hint">(درس ۱۰)</span></li><li>یک نمونه از overengineering در پروژهٔ خودت بیاب و نسخهٔ ساده‌ترش را پیشنهاد بده. <span class="hint">(درس ۱۴)</span></li></ol>' },
+    { t:'text', eyebrow:'مرور نهایی', h:'هر ۲۳ الگو در یک صفحه', html: FAMS_HTML + '<h3 style="font-size:18px">واژه‌نامهٔ کوتاه</h3>' + table(['اصطلاح','معنا'], [
+      ['Abstraction','انتزاع؛ نمایش مفهوم اصلی با پنهان‌کردن جزئیات غیرضروری'],
+      ['Coupling','میزان وابستگی میان اجزا؛ معمولاً هرچه کمتر، تغییر مستقل‌تر'],
+      ['Cohesion','میزان هم‌راستایی مسئولیت‌های داخل یک جزء؛ معمولاً هرچه بیشتر، بهتر'],
+      ['Polymorphism','چندریختی؛ قرارداد مشترک با رفتارهای متفاوت'],
+      ['Delegation','واگذاری اجرای بخشی از کار به شیء همکار'],
+      ['Refactoring','بهبود ساختار داخلی بدون تغییر رفتار قابل مشاهده'],
+      ['Idempotency','اجرای تکراری عملیات بدون اثر نامطلوب تکراری']
+    ]) + '<h3 style="font-size:18px">منابع جزوه برای مطالعهٔ عمیق‌تر</h3><ul class="steps2" style="list-style:disc"><li>Gamma, Helm, Johnson, Vlissides (1994). Design Patterns: Elements of Reusable Object-Oriented Software.</li><li>Freeman, Robson, Bates, Sierra (2020). Head First Design Patterns, 2nd ed.</li><li>Fowler (2002). Patterns of Enterprise Application Architecture.</li><li>Fowler (2018). Refactoring, 2nd ed.</li><li>Refactoring Guru: Design Patterns (refactoring.guru)</li></ul>' },
+    { t:'quiz' } ],
+    quiz:[
+      Q('آزمون کلیدی State؟', ['انتقال‌های مجاز و رد انتقال‌های نامعتبر','سرعت'], 0, ''),
+      Q('آزمون کلیدی Decorator؟', ['حفظ قرارداد مؤلفه و صحت ترتیب ترکیب','تعداد کلاس‌ها'], 0, ''),
+      Q('<span class="hint">درس ۵:</span> 🐑 «کپی سطحی لیست را مشترک نگه می‌دارد»؟', ['Prototype','Builder'], 0, ''),
+      Q('<span class="hint">درس ۷:</span> 🛡️ «ایجاد تنبل»؟', ['Virtual Proxy','Decorator'], 0, ''),
+      Q('<span class="hint">درس ۸:</span> 🌳 «منو و زیرمنو»؟', ['Composite','Iterator'], 0, ''),
+      Q('<span class="hint">درس ۱۱:</span> 🗼 «فرمی که فعال‌شدن یک گزینه چند کنترل را تغییر می‌دهد»؟', ['Mediator','Observer'], 0, ''),
+      Q('<span class="hint">درس ۱۲:</span> 🗣️ «عبارت فیلتر city = Tehran AND paid»؟', ['Interpreter','Visitor'], 0, ''),
+      Q('<span class="hint">درس ۲:</span> 🐧 «زیرکلاسی که قول والد را نمی‌شکند»؟', ['L لیسکوف','I تفکیک رابط'], 0, ''),
+      Q('<span class="hint">درس ۱:</span> '+N_+P_+S_+C_+' یعنی؟', ['نام، مسئله، راه‌حل، پیامد','نوع، متد، رابط، پکیج'], 0, '«نسخه را مکانیکی رونویسی نکن؛ پخته‌اش کن»'),
+      Q('<span class="hint">درس ۱۴:</span> الگو کِی خوب استفاده شده؟', ['وقتی فهم و تغییر سیستم آسان‌تر شده','وقتی کلاس‌ها زیاد شده‌اند'], 0, '')
+    ],
+    card:[['🏷️','نام‌ها مفهوم دامنه را بگویند، نه نام الگو.'],['🧪','هر الگو تست کلیدی خودش را دارد (Strategy: قرارداد یکسان · State: انتقال‌ها · Observer: اشتراک و خطا).'],['✅','چک‌لیست: مسئله روشن؟ abstraction واقعاً لازم؟ وابستگی تزریقی؟ خطا و timeout؟ تست بدون سرویس واقعی؟ هزینه پذیرفته؟ مستند «چرا»؟'],['🗺️','۲۳ الگو: ۵ تولد · ۷ بدن · ۱۱ رفتار. ابتدا مسئله، سپس ساده‌ترین طراحی قابل توسعه.']] }
+  ];
+
+  /* ---------- صحنه‌های تعاملی ---------- */
+  const btn = (label, cls) => '<button type="button" class="' + (cls || 'pick') + '">' + label + '</button>';
+  const CUSTOM = {
+    prototype(el) {
+      let deep = false, orig, copy;
+      el.innerHTML = '<div class="chips"><span class="hint">نوع کپی:</span>' + btn('سطحی (shallow)') + btn('عمیق (deep)') + '</div>' +
+        '<div class="row2"><div class="c3"><h3>🐑 اصل</h3><div data-o></div></div><div class="c3"><h3>🐑 کپی</h3><div data-c></div></div></div>' +
+        '<div class="chips">' + btn('+ برچسب «فوری» به کپی', 'btn primary') + btn('از نو', 'ghost') + '</div><p class="effect" data-msg></p>';
+      const [bS, bD, add, reset] = el.querySelectorAll('button');
+      const draw = () => {
+        const chip = t => '<span class="tag">' + t + '</span>';
+        el.querySelector('[data-o]').innerHTML = '<span class="hint">tags:</span> ' + orig.map(chip).join(' ');
+        el.querySelector('[data-c]').innerHTML = '<span class="hint">tags:</span> ' + copy.map(chip).join(' ') + (copy === orig ? '<p class="hint">همان لیست در حافظه ⚠️</p>' : '<p class="hint">لیست جدا</p>');
+        bS.setAttribute('aria-pressed', !deep); bD.setAttribute('aria-pressed', deep);
+      };
+      const start = () => { orig = ['ماهانه', 'مالی']; copy = deep ? orig.slice() : orig; el.querySelector('[data-msg]').textContent = ''; draw(); };
+      bS.onclick = () => { deep = false; start(); }; bD.onclick = () => { deep = true; start(); };
+      add.onclick = () => { copy.push('فوری'); draw(); el.querySelector('[data-msg]').textContent = deep ? 'فقط کپی تغییر کرد. کپی عمیق لیست را جدا ساخته بود.' : 'اصل هم «فوری» گرفت! کپی سطحی فقط ارجاع به همان لیست را کپی کرد.'; };
+      reset.onclick = start; start();
+    },
+    decorator(el) {
+      const L = { compress:['🗜️ فشرده‌سازی','CompressedSource','compress'], encrypt:['🔒 رمزنگاری','EncryptedSource','encrypt'], log:['📝 ثبت لاگ','LoggingSource','log'] };
+      let order = [];
+      el.innerHTML = '<div class="chips">' + Object.keys(L).map(k => '<button type="button" class="pick" data-k="' + k + '">' + L[k][0] + '</button>').join('') + btn('از نو', 'ghost') + '</div>' +
+        '<pre class="code" data-code></pre><div class="log" data-flow></div><p class="effect" data-warn></p>';
+      const draw = () => {
+        el.querySelectorAll('[data-k]').forEach(b => b.setAttribute('aria-pressed', order.includes(b.dataset.k)));
+        let expr = 'new FileSource()';
+        order.forEach(k => { expr = 'new ' + L[k][1] + '(' + expr + ')'; });
+        el.querySelector('[data-code]').innerHTML = '<span>' + fmt('src = ' + expr) + '</span><span>' + fmt('src.write(data)') + '</span>';
+        const steps = order.slice().reverse().map(k => L[k][0]);
+        el.querySelector('[data-flow]').innerHTML = '<div><b>مسیر داده:</b> write(data) ← ' + (steps.length ? steps.join(' ← ') + ' ← ' : '') + '💾 فایل</div>';
+        const ie = order.indexOf('encrypt'), ic = order.indexOf('compress');
+        el.querySelector('[data-warn]').textContent = (ie > -1 && ic > -1 && ie > ic) ? '⚠️ داده اول رمز می‌شود و بعد فشرده؛ دادهٔ رمزشده تقریباً فشرده نمی‌شود. ترتیب را عوض کن: اول رمزنگاری را روشن کن، بعد فشرده‌سازی.' : (ie > -1 && ic > -1 ? '✓ اول فشرده، بعد رمز. ترتیب درست است.' : 'لایه‌ای که آخر روشن شود بیرونی‌ترین است و اول دادهٔ write را می‌گیرد.');
+        isolateLatin(el);
+      };
+      el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const k = b.dataset.k; order = order.includes(k) ? order.filter(x => x !== k) : order.concat(k); draw(); });
+      el.querySelector('.ghost').onclick = () => { order = []; draw(); };
+      draw();
+    },
+    bridge(el) {
+      let n = 3, m = 3;
+      el.innerHTML = '<div class="chips">' + btn('+ نوع اعلان') + btn('+ کانال ارسال') + btn('از نو', 'ghost') + '</div><div class="row2"><div class="c3"><h3>🧬 با وراثت</h3><span class="bigno" data-a></span><div class="grid-dots" data-ga></div></div><div class="c3"><h3>🌉 با Bridge</h3><span class="bigno" data-b></span><div class="chips" data-gb></div></div></div><p class="effect" data-t></p>';
+      const [pN, pM, r] = el.querySelectorAll('button');
+      const draw = () => {
+        el.querySelector('[data-a]').textContent = fa(n * m) + ' کلاس';
+        el.querySelector('[data-b]').textContent = fa(n + m) + ' کلاس';
+        const ga = el.querySelector('[data-ga]'); ga.style.gridTemplateColumns = 'repeat(' + m + ',18px)'; ga.innerHTML = '<i></i>'.repeat(n * m);
+        el.querySelector('[data-gb]').innerHTML = '<span class="tag">' + fa(n) + ' نوع</span> + <span class="tag">' + fa(m) + ' کانال</span>';
+        el.querySelector('[data-t]').textContent = fa(n) + ' نوع × ' + fa(m) + ' کانال: وراثت ' + fa(n * m) + ' کلاس می‌خواهد، Bridge فقط ' + fa(n + m) + '. هر محور جدید در وراثت ضرب می‌شود.';
+        pN.disabled = n >= 8; pM.disabled = m >= 8;
+      };
+      pN.onclick = () => { n++; draw(); }; pM.onclick = () => { m++; draw(); }; r.onclick = () => { n = 3; m = 3; draw(); };
+      draw();
+    },
+    observer(el) {
+      const subs = [['email','📧 ایمیل مشتری','رسید پرداخت فرستاده شد'],['warehouse','🏬 انبار','بسته‌بندی سفارش شروع شد'],['report','📊 گزارش فروش','فروش امروز به‌روز شد'],['sms','📱 پیامک','پیامک «پرداخت موفق» رفت']];
+      const on = { email:true, warehouse:true, report:false, sms:false };
+      let no = 1040;
+      el.innerHTML = '<div class="row2"><div style="display:flex;flex-direction:column;gap:10px"><span class="eyebrow">مشترک‌ها (subscribe / unsubscribe)</span><div class="chips">' + subs.map(s => '<button type="button" class="pick" data-s="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>' + btn('📣 انتشار OrderPaid', 'btn primary') + '</div><div class="log" data-log><div class="hint">هنوز رویدادی منتشر نشده.</div></div></div>';
+      const draw = () => el.querySelectorAll('[data-s]').forEach(b => b.setAttribute('aria-pressed', !!on[b.dataset.s]));
+      el.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { on[b.dataset.s] = !on[b.dataset.s]; draw(); });
+      el.querySelector('.btn').onclick = () => {
+        const log = el.querySelector('[data-log]'); no++;
+        const active = subs.filter(s => on[s[0]]);
+        log.innerHTML = '<div><b>publish(OrderPaid #' + no + ')</b> ← ' + fa(active.length) + ' مشترک</div>' + (active.length ? active.map((s, i) => '<div style="animation-delay:' + (i * 120) + 'ms">' + s[1] + ': ' + s[2] + '</div>').join('') : '<div class="hint">هیچ مشترکی نیست؛ ناشر کارش را کرد و کسی گوش نمی‌داد.</div>');
+        active.forEach(s => { const b = el.querySelector('[data-s="' + s[0] + '"]'); b.classList.remove('ping'); void b.offsetWidth; b.classList.add('ping'); });
+        isolateLatin(log);
+      };
+      draw();
+    },
+    state(el) {
+      const S = {
+        New:{ fa:'جدید', pay:['Paid','پرداخت انجام شد'], ship:[null,'اول باید پرداخت شود'], cancel:['Cancelled','سفارش لغو شد'] },
+        Paid:{ fa:'پرداخت‌شده', pay:[null,'پرداخت تکراری رد شد'], ship:['Shipped','ارسال شد'], cancel:['Cancelled','لغو شد و پول برگشت'] },
+        Shipped:{ fa:'ارسال‌شده', pay:[null,'قبلاً پرداخت شده'], ship:[null,'قبلاً ارسال شده'], cancel:[null,'بسته در راه است؛ لغو ممکن نیست'] },
+        Cancelled:{ fa:'لغوشده', pay:[null,'سفارش لغو شده'], ship:[null,'سفارش لغو شده'], cancel:[null,'قبلاً لغو شده'] }
+      };
+      let cur = 'New';
+      el.innerHTML = '<div class="chips"><span class="hint">وضعیت فعلی:</span><span class="badge" data-b></span></div><div class="chips">' + btn('💳 pay()') + btn('🚚 ship()') + btn('✖ cancel()') + btn('سفارش تازه', 'ghost') + '</div><div class="log" data-log></div>';
+      const log = el.querySelector('[data-log]');
+      const draw = () => { el.querySelector('[data-b]').innerHTML = '🚦 ' + S[cur].fa + ' <span class="en">' + cur + 'State</span>'; };
+      const act = a => {
+        const [to, msg] = S[cur][a];
+        const line = document.createElement('div');
+        line.innerHTML = (to ? '✓ ' : '✗ ') + '<span class="en">' + cur + 'State.' + a + '()</span>: ' + msg + (to ? ' ← ' + S[to].fa : '');
+        log.prepend(line); if (to) cur = to; draw();
+      };
+      const bs = el.querySelectorAll('.chips:nth-of-type(2) button');
+      bs[0].onclick = () => act('pay'); bs[1].onclick = () => act('ship'); bs[2].onclick = () => act('cancel');
+      bs[3].onclick = () => { cur = 'New'; log.innerHTML = ''; draw(); };
+      draw();
+    },
+    command(el) {
+      let value = 0; const hist = [];
+      const C = [['+۵', v => v + 5, v => v - 5],['×۲', v => v * 2, v => v / 2],['−۳', v => v - 3, v => v + 3]];
+      el.innerHTML = '<div class="chips"><span class="hint">مقدار:</span><span class="bigno" data-v></span></div><div class="chips">' + C.map((c, i) => '<button type="button" class="pick" data-c="' + i + '">🧾 ' + c[0] + '</button>').join('') + btn('↶ undo', 'btn') + '</div><div><span class="eyebrow">تاریخچهٔ Commandها (بالاترین = آخرین)</span><div class="log" data-h></div></div>';
+      const draw = () => {
+        el.querySelector('[data-v]').textContent = fa(value);
+        el.querySelector('[data-h]').innerHTML = hist.length ? hist.slice().reverse().map(h => '<div>🧾 ' + C[h][0] + '</div>').join('') : '<div class="hint">خالی</div>';
+        el.querySelector('.btn').disabled = !hist.length;
+      };
+      el.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { const i = +b.dataset.c; value = C[i][1](value); hist.push(i); draw(); });
+      el.querySelector('.btn').onclick = () => { const i = hist.pop(); value = C[i][2](value); draw(); };
+      draw();
+    },
+    chain(el) {
+      const H = [['سطح ۱','رمز و ورود'],['سطح ۲','پرداخت و مالی'],['سطح ۳','خطای فنی سرور']];
+      const T = [['فراموشی رمز عبور',0],['پول کم شد ولی سفارش ثبت نشد',1],['صفحه خطای ۵۰۰ می‌دهد',2],['درخواست خرید هواپیما',-1]];
+      el.innerHTML = '<div class="chips">' + T.map((t, i) => '<button type="button" class="pick" data-t="' + i + '">📩 ' + t[0] + '</button>').join('') + '</div>' +
+        '<div class="chips" data-hs>' + H.map((h, i) => '<span class="node2" data-h="' + i + '" style="direction:rtl;font-family:var(--f-body)">☎️ ' + h[0] + ' <small>' + h[1] + '</small></span>' + (i < H.length - 1 ? '<span class="hint">←</span>' : '')).join('') + '<span class="hint">←</span><span class="node2" data-h="x" style="direction:rtl;font-family:var(--f-body)">🚫 پیش‌فرض</span></div><div class="log" data-log></div>';
+      let timer = [];
+      el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
+        timer.forEach(clearTimeout); timer = [];
+        const [title, target] = T[+b.dataset.t];
+        const log = el.querySelector('[data-log]'); log.innerHTML = '<div><b>تیکت:</b> ' + title + '</div>';
+        el.querySelectorAll('[data-h]').forEach(n => n.classList.remove('hl'));
+        const path = target === -1 ? [0, 1, 2, 'x'] : Array.from({ length: target + 1 }, (_, i) => i);
+        path.forEach((h, i) => timer.push(setTimeout(() => {
+          el.querySelectorAll('[data-h]').forEach(n => n.classList.remove('hl'));
+          el.querySelector('[data-h="' + h + '"]').classList.add('hl');
+          const line = document.createElement('div');
+          line.textContent = h === 'x' ? '🚫 هیچ‌کس رسیدگی نکرد؛ رفتار پیش‌فرض: «درخواست شما قابل پیگیری نیست». این رفتار را باید از قبل تعریف کنی.' : (h === target ? '✓ ' + H[h][0] + ' رسیدگی کرد.' : '→ ' + H[h][0] + ' نمی‌تواند؛ به بعدی می‌سپارد.');
+          log.appendChild(line);
+        }, i * 550)));
+      });
+    },
+    memento(el) {
+      const hist = []; const MAX = 5;
+      el.innerHTML = '<input class="txt" id="memo-text" aria-label="متن ویرایشگر" value="سلام دنیا">' +
+        '<div class="chips">' + btn('💾 ذخیرهٔ snapshot', 'btn primary') + btn('↶ بازگردانی آخرین', 'btn') + '</div><div><span class="eyebrow">تاریخچه (Caretaker فقط جعبه‌ها را می‌بیند، نه محتوایشان را)</span><div class="log" data-h></div></div><p class="effect" data-m></p>';
+      const input = el.querySelector('#memo-text'), [save, undo] = el.querySelectorAll('.btn');
+      const draw = () => {
+        el.querySelector('[data-h]').innerHTML = hist.length ? hist.map((_, i) => '<div>📦 snapshot ' + fa(i + 1) + '</div>').join('') : '<div class="hint">خالی</div>';
+        undo.disabled = !hist.length;
+      };
+      save.onclick = () => { hist.push({ text: input.value }); let msg = 'ذخیره شد.'; if (hist.length > MAX) { hist.shift(); msg = 'قدیمی‌ترین snapshot حذف شد (حداکثر ' + fa(MAX) + ' تا): سیاست حذف برای کنترل حافظه.'; } el.querySelector('[data-m]').textContent = msg; draw(); };
+      undo.onclick = () => { const m = hist.pop(); input.value = m.text; el.querySelector('[data-m]').textContent = 'وضعیت قبلی برگشت.'; draw(); };
+      draw();
+    },
+    axis(el) {
+      const A = [
+        ['الگوریتم یا قاعدهٔ محاسبه', ['Strategy','Template Method','State']],
+        ['ساخت شیء', ['Factory Method','Abstract Factory','Builder','Prototype','Singleton']],
+        ['رابط ناسازگار با سرویس خارجی', ['Adapter']],
+        ['زیرسیستم پیچیده برای کلاینت', ['Facade']],
+        ['افزودن قابلیت روی هم در زمان اجرا', ['Decorator']],
+        ['کنترل دسترسی یا چرخهٔ عمر', ['Proxy','Singleton']],
+        ['ارتباط و هماهنگی اجزا', ['Observer','Mediator','Chain of Responsibility','Command']],
+        ['ساختار داده (درخت، مجموعه، اشیای زیاد)', ['Composite','Iterator','Visitor','Flyweight']],
+        ['دو محور تغییر مستقل', ['Bridge']],
+        ['ذخیره و بازگشت وضعیت', ['Memento','Command']],
+        ['یک زبان کوچک', ['Interpreter']]
+      ];
+      el.innerHTML = '<div class="chips">' + A.map((a, i) => '<button type="button" class="pick" data-a="' + i + '">' + a[0] + '</button>').join('') + '</div><div class="log" data-o><div class="hint">یک محور را انتخاب کن.</div></div>';
+      el.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
+        el.querySelectorAll('[data-a]').forEach(x => x.setAttribute('aria-pressed', x === b));
+        const a = A[+b.dataset.a];
+        el.querySelector('[data-o]').innerHTML = '<div><b>نامزدها:</b></div><div class="chips">' + a[1].map(k => '<span class="tag">' + PAT[k].img + ' ' + pn(k) + ' <span class="hint">' + PAT[k].tag + '</span></span>').join('') + '</div><div class="hint">قبل از انتخاب: آیا یک تابع یا کلاس کوچک کافی نیست؟ هزینه‌ها (کلاس، indirection، debug) را بسنج.</div>';
+        isolateLatin(el.querySelector('[data-o]'));
+      });
+    },
+    case(el) {
+      const node = (k, label, tag) => '<span class="node2" data-n="' + k + '">' + label + (tag ? ' <small class="' + tag[1] + '">' + tag[0] + '</small>' : '') + '</span>';
+      el.innerHTML = '<div class="casegrid">' +
+        '<div class="crow">' + node('client','Client') + '</div>' +
+        '<div class="crow"><span class="ar">↓</span></div>' +
+        '<div class="crow">' + node('oas','OrderApplicationService',['Facade','fS']) + '<span class="ar">──▶</span>' + node('inv','InventoryService') + '</div>' +
+        '<div class="crow"><span class="ar">├─▶</span>' + node('ps','PaymentStrategy',['Strategy','fB']) + '<span class="ar">─▶</span>' + node('ba','BankAdapter',['Adapter','fS']) + '<span class="ar">─▶</span>' + node('legacy','LegacyBankApi') + '</div>' +
+        '<div class="crow"><span class="ar">├─▶</span>' + node('order','Order',['State','fB']) + '</div>' +
+        '<div class="crow"><span class="ar">└─▶</span>' + node('pub','EventPublisher',['Observer','fB']) + '<span class="ar">─▶</span>' + node('mail','EmailObserver') + '<span class="ar">/</span>' + node('wh','WarehouseObserver') + '</div>' +
+        '</div><div class="chips">' + btn('→ گام قبل', 'btn') + '<span class="badge" data-s></span>' + btn('گام بعد ←', 'btn primary') + '</div><p class="lead" data-t></p>';
+      const ST = [
+        [['client','oas'],'کلاینت درخواست را به OrderApplicationService می‌فرستد.'],
+        [['oas','inv'],'سرویس ورودی، موجودی و قواعد دامنه را اعتبارسنجی می‌کند.'],
+        [['oas','ps','ba','legacy'],'راهبرد پرداخت بر اساس انتخاب کاربر تعیین می‌شود؛ درگاه واقعی از طریق Adapter فراخوانی می‌شود.'],
+        [['order'],'پس از موفقیت پرداخت، وضعیت سفارش به Paid تغییر می‌کند.'],
+        [['pub','mail','wh'],'رخداد OrderPaid منتشر می‌شود و مشترکان اعلان لازم را دریافت می‌کنند.']
+      ];
+      let i = 0;
+      const [prevB, nextB] = el.querySelectorAll('.chips .btn');
+      const draw = () => {
+        el.querySelectorAll('[data-n]').forEach(n => n.classList.toggle('hl', ST[i][0].includes(n.dataset.n)));
+        el.querySelector('[data-s]').textContent = 'گام ' + fa(i + 1) + ' از ' + fa(ST.length);
+        el.querySelector('[data-t]').textContent = ST[i][1];
+        isolateLatin(el.querySelector('[data-t]'));
+        prevB.disabled = i === 0; nextB.disabled = i === ST.length - 1;
+      };
+      prevB.onclick = () => { i--; draw(); }; nextB.onclick = () => { i++; draw(); };
+      draw();
+    },
+    checklist(el) {
+      const items = ['آیا مسئله و محور تغییر به‌روشنی تعریف شده است؟','آیا abstraction واقعاً به چند پیاده‌سازی یا نقطهٔ تغییر نیاز دارد؟','آیا هر کلاس مسئولیت مشخص و نام دامنه‌محور دارد؟','آیا وابستگی‌ها از طریق قراردادهای پایدار تزریق می‌شوند؟','آیا رفتار خطا، null، timeout و تکرار درخواست تعریف شده است؟','آیا تست‌ها بدون اتصال به سرویس واقعی یا state سراسری اجرا می‌شوند؟','آیا هزینهٔ indirection، حافظه و پیچیدگی عملیاتی پذیرفته شده است؟','آیا مستندات توضیح می‌دهند چرا الگو انتخاب شده، نه فقط نام آن را؟'];
+      el.innerHTML = '<div class="cl">' + items.map((t, i) => '<label><input type="checkbox" id="chk-' + i + '">' + t + '</label>').join('') + '</div><p class="score" data-s></p>';
+      const upd = () => { const n = el.querySelectorAll('input:checked').length; el.querySelector('[data-s]').textContent = fa(n) + ' از ' + fa(items.length) + (n === items.length ? ' · طراحی آمادهٔ بازبینی است' : ''); };
+      el.querySelectorAll('input').forEach(c => c.onchange = upd); upd();
+    }
+  };
+
+  /* ---------- ساخت درس‌ها ---------- */
+  const card = $('#card');
+  LESSONS.forEach(def => {
+    sceneNo = 0;
+    const view = document.createElement('div');
+    view.className = 'lessonview'; view.dataset.lesson = def.id; view.dataset.title = def.title; view.hidden = true;
+    def.scenes.forEach(s => {
+      const sec = document.createElement('section');
+      sec.className = 'scene'; sec.hidden = true;
+      if (s.t === 'pattern') { sec.innerHTML = rPattern(s.k); sec.dataset.title = s.k; }
+      else if (s.t === 'text') { sec.innerHTML = rText(s); sec.dataset.title = s.eyebrow; }
+      else if (s.t === 'qs') { sec.innerHTML = rQs(s); sec.dataset.title = 'گرم‌کردن'; const box = sec.querySelector('[data-qs]'); s.qs.forEach((q, k) => { const b = qBox(q, 0, 200 + k * 80); box.appendChild(b); wireOpts(b); }); }
+      else if (s.t === 'sort') { sec.innerHTML = rSort(s); sec.dataset.title = s.eyebrow || 'دسته‌بندی'; sortRows(sec.querySelector('[data-sort]'), s); }
+      else if (s.t === 'custom') { sec.innerHTML = rCustom(s); sec.dataset.title = s.eyebrow; }
+      else if (s.t === 'quiz') { sec.innerHTML = rQuiz(def); sec.dataset.title = 'خودت را بسنج'; EXTRA_QUIZ[def.id] = def.quiz; }
+      view.appendChild(sec);
+    });
+    card.appendChild(view);
+    view.querySelectorAll('[data-custom]').forEach(el => CUSTOM[el.dataset.custom](el));
+  });
+
+  /* ---------- آزمون‌ها + کارت قفل + مرور فاصله‌دار ---------- */
+  const QUIZ = {
+    1: [
+      { q:'کدام بخش کارت الگو هزینه‌ها و محدودیت‌ها را می‌گوید؟', o:[N+' نام', Pm+' مسئله', Sr+' راه‌حل', Cp+' پیامدها'], a:3, w:'پیامدها: چه می‌گیری و چه می‌پردازی.' },
+      { q:'یک اپ پیک باید بین قیمت ارسال عادی، فوری و همان‌روز جابه‌جا شود و گزینه‌های بیشتری هم در راه است. کدام الگو مناسب است؟', o:['Singleton','Strategy','Facade'], a:1, w:'همان شکل پرداخت: یک کار، چند روش قابل تعویض. یعنی Strategy.' },
+      { q:'الگو در برابر الگوریتم: کدام درست است؟', o:['یکی‌اند','الگو همکاری اجزا را نشان می‌دهد؛ الگوریتم گام‌های محاسبه را','الگوریتم از الگو بزرگ‌تر است'], a:1, w:'الگوریتم (داخل متد) ← الگو (چند کلاس) ← معماری (کل سیستم).' },
+      { q:'بخش '+Sr+' <b class="S">راه‌حل</b> در یک الگو چه چیزی را توصیف می‌کند؟', o:['کد دقیق برای کپی','نقش‌ها، مسئولیت‌ها و همکاری‌شان','نام کلاس‌هایی که حتماً باید استفاده کنی'], a:1, w:'یک شکل، نه کد. نام‌ها را خودت انتخاب می‌کنی.' },
+      { q:'کِی باید سراغ الگو رفت؟', o:['همیشه؛ الگوی بیشتر یعنی طراحی بهتر','وقتی نیروی واقعی مثل تغییر مکرر یا کد درهم پیدا شود','فقط در شرکت‌های بزرگ'], a:1, w:'اول نیرو، بعد ساختار. الگو گزینه است، نه قانون.' },
+      { q:'دو دلیل اهمیت الگوها کدام است؟', o:['کد سریع‌تر و فایل‌های کوچک‌تر','تغییر ارزان‌تر و زبان مشترک','کلاس کمتر و بی‌نیازی از تست'], a:1, w:'تغییر یک جا می‌نشیند، و یک کلمه کل طراحی را توضیح می‌دهد.' }
+    ],
+    2: [
+      { q:'👨‍🍳 کلاس <span class="en">Invoice</span> هم مبلغ را حساب می‌کند و هم آن را در پایگاه داده ذخیره می‌کند. کدام اصل زیر سؤال است؟', o:['S تک‌مسئولیتی','L جایگزینی لیسکوف','I تفکیک رابط'], a:0, w:'دو دلیل برای تغییر: قوانین محاسبه و نحوهٔ ذخیره‌سازی.' },
+      { q:'<span class="hint">از درس ۱:</span> «'+N+'سخه را '+Pm+'کانیکی '+Sr+'ونویسی نکن؛ '+Cp+'خته‌اش کن» چه چیزی را یادت می‌آورد؟', o:['چهار اصل SOLID','چهار بخش هر الگو: نام، مسئله، راه‌حل، پیامد','چهار خانوادهٔ الگو'], a:1, w:'حرف اول واژه‌های رنگی = ن·م·ر·پ.' },
+      { q:'⚡ برای افزودن روش ارسال تازه باید یک <span class="en">if/elif</span> بزرگ را باز کنی. کدام اصل شکسته شده؟', o:['O باز/بسته','D وارونگی وابستگی','S تک‌مسئولیتی'], a:0, w:'رفتار تازه باید با کلاس تازه بیاید، نه با ویرایش کد قدیمی.' },
+      { q:'🐧 <span class="en">Square extends Rectangle</span>؛ کدی که فقط عرض را عوض می‌کند، در مربع ارتفاع را هم عوض می‌کند و جواب غلط می‌دهد. کدام اصل؟', o:['I تفکیک رابط','L جایگزینی لیسکوف','O باز/بسته'], a:1, w:'زیرنوع انتظار نوع پایه را شکسته؛ مثل پنگوئن، فقط مثال دیگری است.' },
+      { q:'💡 <span class="en">OrderService</span> داخل خودش <span class="en">new LegacyBankApi()</span> می‌سازد. راه‌حل؟', o:['کلاس را بزرگ‌تر کن','رابط PaymentGateway بساز و آن را از سازنده تزریق کن','از Singleton استفاده کن'], a:1, w:'وابستگی به انتزاع + تزریق از بیرون. تست هم ساده می‌شود.' },
+      { q:'<span class="hint">از درس ۱:</span> در صحنهٔ «الگو چه نیست»، کدام <b>الگو</b> نیست؟', o:['Observer','Strategy','Quicksort'], a:2, w:'Quicksort الگوریتم است: گام‌های محاسبه.' },
+      { q:'🎛️ رابط <span class="en">Machine</span> چهار متد دارد و چاپگر ساده سه‌تایش را «پشتیبانی نمی‌شود» پر کرده. بهترین اصلاح؟', o:['رابط را به رابط‌های کوچک Printer، Scanner و Fax بشکن','متدها را خالی بگذار','از وراثت عمیق‌تر استفاده کن'], a:0, w:'تفکیک رابط: هر کلاینت فقط به چیزی که لازم دارد وابسته باشد.' },
+      { q:'📰 <span class="en">order.customer().wallet().take(50)</span> کدام اصل تکمیلی را نقض می‌کند؟', o:['ترکیب به‌جای وراثت','قانون دمتر (کمترین آگاهی)','cohesion زیاد'], a:1, w:'با دوستِ دوست حرف نزن. بنویس <span class="en">order.charge(50)</span>.' }
+    ]
+  };
+  Object.assign(QUIZ, EXTRA_QUIZ);
+  Object.keys(QUIZ).forEach(id => {
+    const quiz = $('[data-quiz="' + id + '"]'), Q = QUIZ[id];
+    let right = 0, answered = 0;
+    const score = document.createElement('div'); score.className = 'score';
+    Q.forEach((item, qi) => {
+      const box = qBox(item, qi + 1, 180 + qi * 60);
+      quiz.appendChild(box);
+      wireOpts(box, ok => {
+        if (ok) right++; answered++;
+        score.textContent = 'امتیاز: ' + fa(right) + ' از ' + fa(answered) + (answered === Q.length ? (right === Q.length ? ' · همه درست' : ' · صحنه‌هایی را که اشتباه کردی دوباره ببین') : '');
+        if (answered === Q.length) unlock(id);
+      });
+    });
+    quiz.appendChild(score);
+    $('[data-peek="' + id + '"]').addEventListener('click', () => unlock(id));
+    drawPlan(id);
+  });
+  function unlock(id) {
+    $('[data-flash="' + id + '"]').hidden = false; $('[data-locked="' + id + '"]').hidden = true;
+    try { if (!localStorage.getItem('start' + id)) localStorage.setItem('start' + id, String(Date.now())); } catch (e) {}
+    drawPlan(id);
+  }
+  function drawPlan(id) {
+    let start = Date.now();
+    try { const v = Number(localStorage.getItem('start' + id)); if (v) start = v; } catch (e) {}
+    const f = d => new Date(start + d * 864e5).toLocaleDateString('fa-IR', { weekday:'long', day:'numeric', month:'long' });
+    $('[data-plan="' + id + '"]').innerHTML = [[1,'فردا'],[3,'سه روز بعد'],[7,'یک هفته بعد'],[21,'سه هفته بعد']]
+      .map(([d, l]) => '<li>' + l + ' · ' + f(d) + '</li>').join('');
+  }
+
+  /* ---------- پیمایش درس‌ها و صحنه‌ها ---------- */
+  const views = $$('.lessonview'), prog = $('#prog'), prev = $('#prev'), next = $('#next'), where = $('#where');
+  let L = 1, cur = 0, scenes = [];
+  function openLesson(n, sceneIdx) {
+    L = n;
+    views.forEach(v => v.hidden = v.dataset.lesson !== String(n));
+    const view = views.find(v => v.dataset.lesson === String(n));
+    scenes = [...view.querySelectorAll(':scope > .scene')];
+    $('#lpill').textContent = 'درس ' + fa(n);
+    $('#ltitle').textContent = view.dataset.title;
+    isolateLatin($('#ltitle'));
+    $('#legend1').hidden = n !== 1; $('#legend2').hidden = n !== 2; $('#legendP').hidden = n < 3;
+    $$('.map .lesson[data-lesson]').forEach(d => {
+      const on = d.dataset.lesson === String(n);
+      d.classList.toggle('on', on);
+      d.querySelector('.st').textContent = on ? 'اکنون' : 'آماده';
+    });
+    prog.innerHTML = '';
+    scenes.forEach((s, k) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'صحنهٔ ' + fa(k + 1) + ': ' + s.dataset.title);
+      b.addEventListener('click', () => show(k));
+      prog.appendChild(b);
+    });
+    if (location.hash !== '#lesson-' + n) history.replaceState(null, '', '#lesson-' + n);
+    show(sceneIdx || 0);
+  }
+  function show(k) {
+    cur = Math.max(0, Math.min(scenes.length - 1, k));
+    scenes.forEach((s, i) => { s.hidden = i !== cur; s.classList.remove('play'); });
+    void scenes[cur].offsetWidth;
+    scenes[cur].classList.add('play');
+    [...prog.children].forEach((b, i) => { b.className = i === cur ? 'cur' : (i < cur ? 'done' : ''); b.setAttribute('aria-current', i === cur ? 'step' : 'false'); });
+    prev.disabled = cur === 0 && L === 1;
+    const last = cur === scenes.length - 1;
+    next.textContent = last ? (views.some(v => v.dataset.lesson === String(L + 1)) ? 'درس بعد ←' : 'از اول ↺') : 'بعدی ←';
+    prev.textContent = cur === 0 && L > 1 ? '→ درس قبل' : '→ قبلی';
+    where.textContent = fa(cur + 1) + ' از ' + fa(scenes.length) + ' · ' + scenes[cur].dataset.title;
+    isolateLatin(where);
+    const card = $('#card');
+    if (card.getBoundingClientRect().top < 0) card.scrollIntoView({ block:'start' });
+  }
+  function goNext() {
+    if (cur < scenes.length - 1) return show(cur + 1);
+    if (views.some(v => v.dataset.lesson === String(L + 1))) openLesson(L + 1); else show(0);
+  }
+  function goPrev() {
+    if (cur > 0) return show(cur - 1);
+    if (L > 1) { openLesson(L - 1); show(scenes.length - 1); }
+  }
+  next.addEventListener('click', goNext);
+  prev.addEventListener('click', goPrev);
+  $('#replay').addEventListener('click', () => show(cur));
+  document.addEventListener('keydown', e => {
+    if (e.target.closest('input,textarea,summary')) return;
+    if (e.key === 'ArrowLeft') goNext();
+    if (e.key === 'ArrowRight') goPrev();
+  });
+  $$('[data-go]').forEach(b => b.addEventListener('click', () => { openLesson(Number(b.dataset.go)); if (narrow.matches) map.open = false; }));
+  window.addEventListener('hashchange', () => { const m = location.hash.match(/^#lesson-(\d+)$/); if (m && Number(m[1]) !== L && views.some(v => v.dataset.lesson === m[1])) openLesson(Number(m[1])); });
+
+  const map = $('#map'), narrow = matchMedia('(max-width:980px)');
+  if (narrow.matches) map.open = false;
+  map.querySelector(':scope > summary').addEventListener('click', e => { if (!narrow.matches) e.preventDefault(); });
+
+  isolateLatin(document.querySelector('.wrap'));
+
+  const m = location.hash.match(/^#lesson-(\d+)$/);
+  openLesson(m && views.some(v => v.dataset.lesson === m[1]) ? Number(m[1]) : 1);
+})();
+</script>
