@@ -771,7 +771,8 @@ table.t tr:last-child td{border-bottom:0}
   /* Wrap every run of Latin text inside Persian text in <bdi dir="ltr">, so e.g. "SOLID+",
      "if/elif" or "a.b().c()" keep their own left-to-right order inside a right-to-left sentence. */
   const LAT = /[A-Za-z][A-Za-z0-9_.+\/\-()'"<>*]*(?:[ ]+[A-Za-z0-9_.+\/\-()'"<>*]*[A-Za-z0-9_+)'"])*/g;
-  const SKIP = 'PRE,CODE,SCRIPT,STYLE,BDI,.en,.cart,.out,.letter,[dir="ltr"]';
+  // svg: an HTML <bdi> inside SVG <text> is not rendered, so the words would vanish from diagrams
+  const SKIP = 'PRE,CODE,SCRIPT,STYLE,BDI,svg,.en,.cart,.out,.letter,[dir="ltr"]';
   function isolateLatin(root) {
     if (!root) return;
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
@@ -1244,7 +1245,7 @@ table.t tr:last-child td{border-bottom:0}
   const Q = (q, o, a, w) => ({ q, o, a, w });
   /* ---------- نمادهای UML (برای درس ۳) ---------- */
   const SYM = {
-    assoc:'<line x1="4" y1="12" x2="104" y2="12"/>',
+    assoc:'<line x1="4" y1="12" x2="104" y2="12"/><polyline points="94,5 105,12 94,19" fill="none"/>',
     inherit:'<line x1="4" y1="12" x2="92" y2="12"/><polygon points="106,12 92,5 92,19" style="fill:var(--surface)"/>',
     realize:'<line x1="4" y1="12" x2="92" y2="12" stroke-dasharray="6 4"/><polygon points="106,12 92,5 92,19" style="fill:var(--surface)"/>',
     depend:'<line x1="4" y1="12" x2="104" y2="12" stroke-dasharray="6 4"/><polyline points="94,5 105,12 94,19" fill="none"/>',
@@ -1252,19 +1253,23 @@ table.t tr:last-child td{border-bottom:0}
     aggreg:'<polygon points="4,12 15,6 26,12 15,18" style="fill:var(--surface)"/><line x1="26" y1="12" x2="104" y2="12"/>'
   };
   const sym = k => '<svg class="sym" viewBox="0 0 110 24" stroke="currentColor" stroke-width="1.8" fill="none" aria-hidden="true">' + SYM[k] + '</svg>';
-  const STRAT_UML = '<div class="tw" style="direction:ltr"><svg viewBox="0 0 520 190" style="width:100%;min-width:420px;display:block;color:var(--ink)" role="img" aria-label="نمودار کلاس Strategy: Checkout یک PaymentMethod نگه می‌دارد؛ CardPayment و WalletPayment آن را پیاده‌سازی می‌کنند">' +
+  const STRAT_UML = '<div class="tw" style="direction:ltr"><svg viewBox="0 0 600 280" style="width:100%;min-width:460px;display:block;color:var(--ink)" role="img" aria-label="نمودار کلاس Strategy: Checkout یک PaymentMethod دارد؛ CardPayment و WalletPayment آن را پیاده‌سازی می‌کنند؛ از Checkout هیچ خطی به روش‌های واقعی نمی‌رود">' +
     '<g stroke="currentColor" stroke-width="1.8" fill="none">' +
-    '<rect x="10" y="64" width="130" height="44" rx="4" style="fill:var(--surface)"/>' +
-    '<rect x="250" y="10" width="200" height="54" rx="4" style="fill:var(--surface)"/>' +
-    '<rect x="200" y="130" width="130" height="40" rx="4" style="fill:var(--surface)"/>' +
-    '<rect x="360" y="130" width="140" height="40" rx="4" style="fill:var(--surface)"/>' +
-    '<polygon points="140,86 152,80 164,86 152,92" style="fill:var(--surface)"/><line x1="164" y1="86" x2="250" y2="40"/>' +
-    '<line x1="265" y1="130" x2="350" y2="80" stroke-dasharray="6 4"/><line x1="430" y1="130" x2="350" y2="80" stroke-dasharray="6 4"/>' +
-    '<polygon points="350,64 342,80 358,80" style="fill:var(--surface)"/></g>' +
-    '<g style="fill:var(--ink);font-family:var(--f-mono);font-size:13px" text-anchor="middle">' +
-    '<text x="75" y="91">Checkout</text><text x="350" y="31" style="font-size:11px;fill:var(--muted)">«interface»</text><text x="350" y="51">PaymentMethod</text>' +
-    '<text x="265" y="155">CardPayment</text><text x="430" y="155">WalletPayment</text></g>' +
-    '<g style="fill:var(--muted);font-family:var(--f-body);font-size:12px" text-anchor="middle"><text x="75" y="126">Context</text><text x="470" y="48" text-anchor="start">Strategy</text><text x="350" y="186">ConcreteStrategy</text></g>' +
+    '<rect x="20" y="48" width="180" height="64" rx="6" style="fill:var(--surface)"/>' +
+    '<rect x="300" y="48" width="200" height="72" rx="6" style="fill:var(--surface)"/>' +
+    '<rect x="250" y="190" width="150" height="56" rx="6" style="fill:var(--surface)"/>' +
+    '<rect x="430" y="190" width="150" height="56" rx="6" style="fill:var(--surface)"/>' +
+    '<polygon points="200,80 212,74 224,80 212,86" style="fill:var(--surface)"/><line x1="224" y1="80" x2="300" y2="80"/>' +
+    '<line x1="325" y1="190" x2="400" y2="136" stroke-dasharray="6 4"/><line x1="505" y1="190" x2="400" y2="136" stroke-dasharray="6 4"/>' +
+    '<polygon points="400,120 391,136 409,136" style="fill:var(--surface)"/></g>' +
+    '<g style="fill:var(--behave);font-family:var(--f-body);font-size:13px;font-weight:800" text-anchor="middle">' +
+    '<text x="110" y="38">Context · استفاده‌کننده</text><text x="400" y="38">Strategy · قرارداد</text><text x="415" y="270">ConcreteStrategy · روش واقعی</text></g>' +
+    '<g style="fill:var(--ink);font-family:var(--f-mono);font-size:14px;font-weight:600" text-anchor="middle">' +
+    '<text x="110" y="76">Checkout</text><text x="400" y="88">PaymentMethod</text><text x="325" y="214">CardPayment</text><text x="505" y="214">WalletPayment</text></g>' +
+    '<g style="fill:var(--muted);font-family:var(--f-mono);font-size:11px" text-anchor="middle">' +
+    '<text x="110" y="98">method.pay(total)</text><text x="400" y="66">«interface»</text><text x="400" y="108">pay(amount)</text><text x="325" y="234">pay(amount)</text><text x="505" y="234">pay(amount)</text></g>' +
+    '<g style="fill:var(--ink);font-family:var(--f-body);font-size:12px" text-anchor="middle">' +
+    '<text x="262" y="70">دارد</text><text x="400" y="170">پیاده می‌کنند</text></g>' +
     '</svg></div>';
 
   const famCol = (fk, title, img, mnem, goal, keys) => '<div class="famcol" style="--fc:var(--' + fk + ')"><span class="big" aria-hidden="true">' + img + '</span><h3>' + title + '</h3><b>' + mnem + '</b><p style="font-size:14px">' + goal + '</p><div class="chips">' + keys.map(k => '<span class="tag">' + PAT[k].img + ' ' + pn(k) + '</span>').join('') + '</div></div>';
@@ -1297,16 +1302,32 @@ table.t tr:last-child td{border-bottom:0}
       ['🧾 Command', 2, 'رفتاری: درخواست را شیء می‌کند.'],
       ['👑 Singleton', 0, 'ایجادگرا: ساخت را به یک نمونه محدود می‌کند.']
     ]},
-    { t:'text', eyebrow:'نمادهای رایج UML', h:'شش خط که باید بشناسی', lead:'نمودار کلاس زبان تصویری الگوهاست. هر الگو در کتاب‌ها با همین نمادها کشیده می‌شود.', html: table(['نماد','نام','معنا'], [
-      [sym('assoc'), 'Association · ارتباط', 'ارتباط میان دو نوع؛ ممکن است نقش و multiplicity (تعداد) داشته باشد.'],
-      [sym('inherit'), 'Inheritance · وراثت', 'رابطهٔ «نوعی از» میان زیرکلاس و کلاس پایه.'],
-      [sym('realize'), 'Realization · پیاده‌سازی', 'یک کلاس یک Interface را پیاده‌سازی می‌کند.'],
-      [sym('depend'), 'Dependency · وابستگی', 'یک جزء برای انجام کار به جزء دیگر وابسته است.'],
-      [sym('compose'), 'Composition · ترکیب', 'رابطهٔ کل-جزء با مالکیت قوی: جزء با کل می‌میرد.'],
-      [sym('aggreg'), 'Aggregation · تجمیع', 'رابطهٔ کل-جزء ضعیف‌تر: جزء می‌تواند جدا زندگی کند.']
-    ]) + '<p class="hint">کلاس یا Interface با یک مستطیل نشان داده می‌شود؛ Interface معمولاً برچسب «interface» دارد.</p>',
-      check:{ q:'خط‌چین با مثلث توخالی، و خط پیوسته با مثلث توخالی: فرقشان؟', a:'خط‌چین = پیاده‌سازی یک Interface (Realization). خط پیوسته = وراثت از یک کلاس (Inheritance).' } },
-    { t:'text', eyebrow:'روش خواندن نمودار', h:'اول نقش‌ها، بعد جهت‌ها', html:'<ol class="steps2"><li><b>نقش‌ها را پیدا کن</b>؛ مثل Context، Strategy، Subject یا Observer.</li><li><b>جهت وابستگی و مسیر فراخوانی را دنبال کن</b>: چه کسی چه کسی را صدا می‌زند؟</li><li>یادت باشد <b>نمودار جایگزین فهم رفتار زمان اجرا نیست</b>.</li></ol>' + STRAT_UML + '<p class="sub">این همان Strategy درس ۱ است: Checkout (Context) یک PaymentMethod نگه می‌دارد (لوزی توخالی)، و CardPayment و WalletPayment آن را پیاده می‌کنند (خط‌چین + مثلث).</p>',
+    { t:'text', eyebrow:'نمادهای رایج UML', h:'شش خط، با یک کلید برای به‌خاطر سپردن', lead:'نمودار کلاس زبان تصویری الگوهاست: هر مستطیل یک کلاس یا رابط (Interface) است و هر خط می‌گوید این دو چه نسبتی با هم دارند. لازم نیست شش خط را جدا حفظ کنی؛ فقط سه سؤال بپرس.', html:
+      '<div class="famcols">' +
+        '<div class="famcol" style="--fc:var(--found)"><span class="big" aria-hidden="true">۱</span><h3>سرِ خط چه شکلی است؟</h3><p style="font-size:14px"><b>△ مثلث = «نوعی از … است»</b><br>نوک مثلث سمت کلی‌تر است (پدر یا رابط).</p><p style="font-size:14px"><b>› پیکان = «… را به کار می‌برد»</b><br>نوک پیکان سمت چیزی است که استفاده می‌شود.</p><p style="font-size:14px"><b>◇ لوزی = «… را دارد»</b><br>لوزی سمت صاحب است؛ مثل جعبهٔ جواهر در دست صاحبش.</p></div>' +
+        '<div class="famcol" style="--fc:var(--found)"><span class="big" aria-hidden="true">۲</span><h3>خط پیوسته است یا خط‌چین؟</h3><p style="font-size:14px"><b>پیوسته = رابطهٔ محکم و همیشگی</b><br>در خود تعریف کلاس نوشته شده.</p><p style="font-size:14px"><b>خط‌چین = رابطهٔ سست</b><br>یا فقط یک «قول» است (پیاده‌سازی رابط)، یا یک استفادهٔ گذرا (قرض گرفتن برای یک لحظه).</p></div>' +
+        '<div class="famcol" style="--fc:var(--found)"><span class="big" aria-hidden="true">۳</span><h3>لوزی پُر است یا توخالی؟</h3><p style="font-size:14px"><b>◆ پُر = تمام‌وکمال مال من</b><br>جزء با صاحبش ساخته می‌شود و با او از بین می‌رود.</p><p style="font-size:14px"><b>◇ توخالی = نگهش می‌دارم، ولی مستقل است</b><br>جزء بدون صاحب هم زنده می‌ماند.</p></div>' +
+      '</div>' +
+      '<p class="sub">خواندن هر خط: از سرِ ساده شروع کن و به سرِ شکل‌دار برس، و جمله بساز. مثلاً «CardPayment <b>نوعی از</b> PaymentMethod است». برای لوزی برعکس: از سمت لوزی بخوان، «صاحب <b>دارد</b> …».</p>' +
+      table(['نماد','نام','جمله‌اش','مثال'], [
+      [sym('inherit'), 'Inheritance · وراثت', 'الف <b>نوعی از</b> ب است (ب یک کلاس واقعی است).', '<bdi dir="ltr">Dog —▷ Animal</bdi>: سگ نوعی حیوان است.'],
+      [sym('realize'), 'Realization · پیاده‌سازی', 'الف <b>قول</b> ب را اجرا می‌کند (ب فقط یک رابط است).', '<bdi dir="ltr">CardPayment - -▷ PaymentMethod</bdi>: کارت قول «پرداخت کردن» را اجرا می‌کند.'],
+      [sym('assoc'), 'Association · ارتباط', 'الف <b>همیشه</b> ب را می‌شناسد (ب در یکی از فیلدهای الف است).', '<bdi dir="ltr">Order —› Customer</bdi>: هر سفارش همیشه می‌داند مال کدام مشتری است.'],
+      [sym('depend'), 'Dependency · وابستگی', 'الف ب را <b>فقط یک لحظه</b> به کار می‌برد (مثلاً به‌عنوان ورودی یک متد).', '<bdi dir="ltr">Report - -› Printer</bdi>: گزارش فقط هنگام چاپ، چاپگر را قرض می‌گیرد.'],
+      [sym('compose'), 'Composition · ترکیب', 'الف ب را <b>کاملاً مالک است</b>؛ ب با الف می‌میرد.', '<bdi dir="ltr">House ◆— Room</bdi>: خانه را خراب کنی، اتاق‌ها هم از بین می‌روند.'],
+      [sym('aggreg'), 'Aggregation · تجمیع', 'الف ب را <b>نگه می‌دارد</b>، ولی ب مستقل است.', '<bdi dir="ltr">Team ◇— Player</bdi>: تیم منحل شود، بازیکن هنوز بازیکن است.']
+    ]) + '<p class="hint">پیکان ارتباط گاهی کشیده نمی‌شود و فقط یک خط ساده می‌بینی؛ معنایش همان «می‌شناسد» است. رابط معمولاً برچسب «interface» دارد.</p>',
+      check:{ q:'خط‌چین با مثلث توخالی، و خط پیوسته با مثلث توخالی: فرقشان؟', a:'هر دو مثلث دارند، پس هر دو «نوعی از … است». خط‌چین یعنی سست: فقط قول یک رابط را اجرا می‌کند (Realization). پیوسته یعنی محکم: از یک کلاس واقعی ارث می‌برد (Inheritance).' } },
+    { t:'text', eyebrow:'روش خواندن نمودار', h:'اول نقش‌ها، بعد خط‌ها', lead:'<b>نقش</b> یعنی عنوان شغلی یک کلاس در الگو. الگو نمی‌گوید اسم کلاست چه باشد؛ می‌گوید چه کاری بکند. مثل رستوران: «سرآشپز» یک نقش است، و هر کسی می‌تواند آن را بر عهده بگیرد. Context و Strategy و Subject اسم کلاس نیستند، اسم نقش‌اند.', html:
+      table(['نقش در Strategy','به زبان ساده','در صندوق فروشگاه'], [
+        ['<span class="pn fB">Context</span><br>زمینه / استفاده‌کننده', 'کلاسی که کار اصلی را انجام می‌دهد و یک تکهٔ قابل‌تعویض دارد. نمی‌داند آن تکه دقیقاً چطور کار می‌کند.', 'Checkout (صندوق): مبلغ را حساب می‌کند و فقط می‌گوید «بپرداز».'],
+        ['<span class="pn fB">Strategy</span><br>راهبرد / قرارداد', 'یک رابط که می‌گوید هر روش باید چه کاری بلد باشد؛ خودش هیچ کاری انجام نمی‌دهد.', 'PaymentMethod: «هر روش پرداخت باید pay(amount) داشته باشد.»'],
+        ['<span class="pn fB">ConcreteStrategy</span><br>راهبرد واقعی', 'هر روش واقعی که قرارداد را اجرا می‌کند. می‌شود هر وقت خواستی یکی تازه اضافه کرد.', 'CardPayment و WalletPayment.']
+      ]) +
+      '<p class="sub">داستان: سارا سر صندوق «کیف پول» را انتخاب می‌کند. صندوق یک WalletPayment در جای PaymentMethod می‌گذارد و فقط pay() را صدا می‌زند. ماه بعد «پرداخت قسطی» اضافه می‌شود: فقط یک کلاس تازه می‌نویسیم و به صندوق دست نمی‌زنیم.</p>' +
+      STRAT_UML +
+      '<ol class="steps2"><li><b>نقش‌ها</b>: برچسب نارنجی بالای هر جعبه نقش آن را می‌گوید.</li><li><b>خط لوزی‌دار</b> از Checkout به PaymentMethod: «صندوق یک روش پرداخت <b>دارد</b>». لوزی توخالی است، چون روش پرداخت بدون صندوق هم معنا دارد.</li><li><b>خط‌چین با مثلث</b> از CardPayment و WalletPayment: «هر کدام <b>نوعی از</b> PaymentMethod‌اند و قولش را اجرا می‌کنند».</li><li><b>خطی که نیست</b>: از Checkout هیچ خطی به CardPayment یا WalletPayment نمی‌رود. نکتهٔ اصلی الگو همین است.</li></ol>' +
+      '<p class="hint">Subject و Observer هم نقش‌اند، ولی مال الگوی دیگری (Observer، درس ۹): Subject چیزی است که دیگران زیر نظرش دارند (مثل یک کانال)، و Observerها مشترک‌هایی‌اند که با هر خبر تازه باخبر می‌شوند. هر الگو نقش‌های خودش را دارد.</p>',
       check:{ q:'در نمودار بالا، Checkout به کدام کلاس‌ها وابسته است؟', a:'فقط به رابط PaymentMethod. هیچ خطی از Checkout به CardPayment یا WalletPayment نمی‌رود؛ همین باعث می‌شود روش تازه بدون تغییر Checkout اضافه شود.' } },
     { t:'quiz' } ],
     quiz:[
@@ -1317,7 +1338,7 @@ table.t tr:last-child td{border-bottom:0}
       Q('📣 Observer در کدام خانواده است؟', FAMLAB, 2, '💬 رفتار: اشیا چطور با هم حرف می‌زنند.'),
       Q('<span class="hint">از درس ۲:</span> 🎛️ رابطی بزرگ که کلاس‌ها نیمی از متدهایش را «پشتیبانی نمی‌شود» پر می‌کنند، کدام اصل را می‌شکند؟', ['I تفکیک رابط','S تک‌مسئولیتی','D وارونگی وابستگی'], 0, 'رابط‌های کوچک و هدفمند.')
     ],
-    card:[['🌱','ایجادگرا = تولد (۵ الگو): ساخت اشیا'],['🦴','ساختاری = بدن (۷ الگو): ترکیب اجزا'],['💬','رفتاری = رفتار (۱۱ الگو): تعامل و مسئولیت'],['UML','خط پیوسته + مثلث = وراثت · خط‌چین + مثلث = پیاده‌سازی رابط · خط‌چین + پیکان = وابستگی · لوزی توپر/توخالی = ترکیب/تجمیع'],['👀','خواندن: نقش‌ها ← جهت وابستگی ← مسیر فراخوانی']] },
+    card:[['🌱','ایجادگرا = تولد (۵ الگو): ساخت اشیا'],['🦴','ساختاری = بدن (۷ الگو): ترکیب اجزا'],['💬','رفتاری = رفتار (۱۱ الگو): تعامل و مسئولیت'],['UML','سرِ خط: △ نوعی از · › به کار می‌برد · ◇ دارد (لوزی سمت صاحب). خط‌چین = سست (قول یا استفادهٔ گذرا). لوزی پُر = با صاحبش می‌میرد'],['👀','خواندن: نقش‌ها (عنوان شغلی کلاس‌ها) ← هر خط را جمله کن ← خطی که نیست']] },
 
   /* ===================== درس ۴ ===================== */
   { id:4, icon:'🏭', title:'Singleton و Factory Method', next:'درس ۵ · Abstract Factory، Builder و Prototype', scenes:[
